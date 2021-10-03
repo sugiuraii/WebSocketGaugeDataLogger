@@ -4,7 +4,8 @@
   "description": "Data logger application for WebSocketGauge",
   "main": "dist/bundle.js",
   "scripts": {
-    "build": "npx webpack"
+    "build-server": "npx webpack",
+    "build-client": "cd src/echart-test && npx webpack"
   },
   "author": "K.Sz2",
   "license": "MIT",
@@ -38,7 +39,6 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",
-    "html-webpack-plugin": "^5.3.2",
     "prettier": "^2.3.2",
     "ts-loader": "^9.2.5",
     "tsconfig-paths": "^3.10.1",
