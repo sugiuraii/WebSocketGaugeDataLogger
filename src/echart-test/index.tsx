@@ -1,40 +1,11 @@
-import React, { useEffect, useState, VoidFunctionComponent } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import * as Echarts from 'echarts'
-import { RunCommandControl } from 'lib/DataLogger/View/Parts/RunCommandControl';
-import { WebsocketParameterCode } from 'lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode';
 import ReactEcharts from 'echarts-for-react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { Container, Nav, Navbar } from 'react-bootstrap';
-import { StateModel } from 'lib/DataLogger/Model/StateModel';
-import { RunStateControl } from 'lib/DataLogger/View/Parts/RunStateControl';
-
-const ControlPage : VoidFunctionComponent = () => {
-    const [appState, setAppState] = useState<StateModel>({IsRunning : false, RunningCommand : {DataStoreInterval : 0, DataStoreSize : 0, ParameterCodeList :[], WebsocketMessageInterval : 0}});
-    
-    useEffect( () => {
-        fetch("/api/state").then(res => res.json().then(obj => setAppState(obj)));
-    });
-
-    const pageElem = appState.IsRunning?
-                <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await fetch('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
-                :
-                <RunCommandControl
-                    parameterCodeToSelect={[WebsocketParameterCode.Engine_Load, WebsocketParameterCode.Engine_Speed, WebsocketParameterCode.Manifold_Absolute_Pressure]}
-                    onSet={ async (p) => 
-                    {
-                        console.log(p);
-                        const res = await (await fetch('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p) })).json();
-                        console.log(res);
-                    }}
-                />;
-    return(
-        <>
-            {pageElem}
-        </>
-    );
-};
+import { ControlPage } from 'lib/DataLogger/View/Pages/ControlPages';
 
 const run = async () => {
     const container = document.getElementById('contents');
