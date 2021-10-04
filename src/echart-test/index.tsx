@@ -5,63 +5,14 @@ import ReactEcharts from 'echarts-for-react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { Container, Nav, Navbar } from 'react-bootstrap';
-import { ControlPage } from 'lib/DataLogger/View/Pages/ControlPages';
+import { ControlPage } from 'lib/DataLogger/View/Pages/ControlPage';
+import { ChartPage } from 'lib/DataLogger/View/Pages/ChartPage';
 
 const run = async () => {
     const container = document.getElementById('contents');
-    const host = location.host;
-    const res = await fetch("http://" + host + "/api/store");
-    const dataStore: { time: number[], value: { [key: string]: number[] } } = await res.json();
-
-    const yAxisOption: Echarts.EChartOption.YAxis[] = [];
-    const seriesOption: Echarts.EChartOption.Series[] = [];
-    let axisIndex = 0;
-    for (let code in dataStore.value) {
-        yAxisOption.push({ type: 'value', name: code });
-        seriesOption.push({ data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
-        axisIndex++;
-    }
-
-    const option: Echarts.EChartOption = {
-        tooltip: {
-            show: true,
-            trigger: 'axis'//,
-            //position: function (pt) {
-            //    return [pt[0], '10%'];
-            //}
-        },
-        xAxis: {
-            type: 'category',
-            data: dataStore.time
-        },
-        yAxis: yAxisOption,
-        series: seriesOption
-        /*
-        yAxis: {
-            type: 'value'
-        },
-        series: [{
-            data: dataStore.value,
-            type: 'line'
-        }]
-        */
-    };
-
-    const chartElem = () => (seriesOption.length == 0) ? 
-                    (<div>Data is not available.</div>) 
-                    :
-                    (<ReactEcharts
-                        option={option}
-                        notMerge={true}
-                        lazyUpdate={true}
-                        theme={"theme_name"}
-                        //onChartReady={this.onChartReadyCallback}
-                        //onEvents={EventsDict}
-                        //opts={ }
-                    />);
-
-    const controlElem = () =>  
-            <ControlPage />;
+    
+    const chartElem = () => <ChartPage />; 
+    const controlElem = () => <ControlPage />;
 
     ReactDOM.render
         (
