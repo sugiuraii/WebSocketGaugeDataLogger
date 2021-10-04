@@ -57,9 +57,8 @@ export class DataLoggerController
         app.post('/api/run', async (req, res) => 
         {
             const command : RunCommandModel = req.body;
+            runningCommand = command;
             this.logger.appendLog(JSON.stringify(command));
-            const runState : StateModel = {IsRunning : service.IsRunning, RunningCommand : runningCommand};
-            res.send(JSON.stringify(runState));
             store = DataLogStoreFactory.getMemoryDataLogStore(command.DataStoreSize);
             await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);
         });
