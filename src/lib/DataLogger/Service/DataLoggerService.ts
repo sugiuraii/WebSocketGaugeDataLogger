@@ -54,8 +54,10 @@ export class DataLoggerService
     public async run(store : DataLogStore, parameterCodeList : WebsocketParameterCode[], dataStoreInterval : number, websocketMessageInterval : number)
     {
         if(this.cancellationToken !== undefined)
-            throw Error("DataLoggerService.run() is called. However DataLoggerSerice is already running.");
-        
+            throw new Error("DataLoggerService.run() is called. However DataLoggerSerice is already running.");
+        if(parameterCodeList.length === 0)
+            throw new Error("Parameter code list is empty.");
+
         const wsOption = this.WSOption;
         const wsc = new WebsocketObjectCollection(this.Logger, wsOption, websocketMessageInterval);
         parameterCodeList.forEach(code => wsc.WSMapper.registerParameterCode(code as WebsocketParameterCode, ReadModeCode.SLOWandFAST));
@@ -78,7 +80,7 @@ export class DataLoggerService
     public stop()
     {
         if(this.cancellationToken === undefined)
-            throw Error("DataLoggerService.stop() is called. However DataLoggerSerice is not running.");
+            throw new Error("DataLoggerService.stop() is called. However DataLoggerSerice is not running.");
         else
             this.cancellationToken.cancel();
     }

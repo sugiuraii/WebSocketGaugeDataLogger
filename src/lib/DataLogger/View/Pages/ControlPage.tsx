@@ -44,8 +44,8 @@ export const ControlPage : VoidFunctionComponent = () => {
                     onSet={ async (p) => 
                     {
                         console.log(p);
-                        const res = await (await fetch('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p) })).json();
-                        console.log(res);
+                        const res = await fetch('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p) });
+                        console.log(await res.json());
                     }}
                 />;
     return(
