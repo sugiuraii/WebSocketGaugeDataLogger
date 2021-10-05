@@ -71,7 +71,7 @@ class MemoryDataLogStore implements DataLogStore
             if(this.valueArray[key])
                 this.valueArray[key].push(value[key])
             else
-                throw Error("Key of " + key + " was not registered at first sample.");
+                throw new Error("Key of " + key + " was not registered at first sample.");
         }
     }
 

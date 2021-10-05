@@ -60,7 +60,21 @@ export class DataLoggerController
             runningCommand = command;
             this.logger.appendLog(JSON.stringify(command));
             store = DataLogStoreFactory.getMemoryDataLogStore(command.DataStoreSize);
-            await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);
+            try
+            {
+                await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);
+                res.send({ok: true, error:""});
+            }
+            catch(e)
+            {
+                if(e instanceof Error)
+                {
+                    console.log(e);
+                    res.send({ok: false, error:e.message});
+                }
+                else
+                    throw e;
+            }
         });
 
         app.post('/api/stop', async(req, res) => 
