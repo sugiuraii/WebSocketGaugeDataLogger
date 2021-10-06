@@ -11,8 +11,9 @@ import { ChartPage } from 'lib/DataLogger/View/Pages/ChartPage';
 const run = async () => {
     const container = document.getElementById('contents');
     
+    const parameterCodeListToSelect = await(await fetch('/api/setting/available_code_list')).json();
     const chartElem = () => <ChartPage />; 
-    const controlElem = () => <ControlPage />;
+    const controlElem = () => <ControlPage parameterCodeListToSelect={parameterCodeListToSelect}/>;
 
     ReactDOM.render
         (
