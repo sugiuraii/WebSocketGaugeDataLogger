@@ -26,11 +26,16 @@ import { RunResultModel } from "lib/DataLogger/Model/RunResultModel";
 import { StateModel } from "lib/DataLogger/Model/StateModel";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 import React from "react";
-import { useEffect, useState, VoidFunctionComponent } from "react";
+import { useEffect, useState, FunctionComponent } from "react";
 import { RunCommandControl } from "../Parts/RunCommandControl";
 import { RunStateControl } from "../Parts/RunStateControl";
 
-export const ControlPage : VoidFunctionComponent = () => {
+export type ControlPageProps = 
+{
+    parameterCodeListToSelect : WebsocketParameterCode[]
+};
+
+export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
     const [appState, setAppState] = useState<StateModel>({IsRunning : false, RunningCommand : {DataStoreInterval : 0, DataStoreSize : 0, ParameterCodeList :[], WebsocketMessageInterval : 0}});
     
     useEffect( () => {
@@ -47,7 +52,7 @@ export const ControlPage : VoidFunctionComponent = () => {
                 <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await fetch('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
                 :
                 <RunCommandControl
-                    parameterCodeToSelect={[WebsocketParameterCode.Engine_Load, WebsocketParameterCode.Engine_Speed, WebsocketParameterCode.Manifold_Absolute_Pressure]}
+                    parameterCodeToSelect={p.parameterCodeListToSelect}
                     onSet={ async (p) => 
                     {
                         console.log(p);
