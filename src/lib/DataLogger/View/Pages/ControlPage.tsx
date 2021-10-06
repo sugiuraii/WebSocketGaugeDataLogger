@@ -22,6 +22,7 @@
  * THE SOFTWARE.
  */
 
+import { RunResultModel } from "lib/DataLogger/Model/RunResultModel";
 import { StateModel } from "lib/DataLogger/Model/StateModel";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 import React from "react";
@@ -50,8 +51,10 @@ export const ControlPage : VoidFunctionComponent = () => {
                     onSet={ async (p) => 
                     {
                         console.log(p);
-                        const res = await fetch('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p) });
-                        console.log(await res.json());
+                        const res :  RunResultModel = await(await fetch('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p) })).json();
+                        console.log(res);
+                        if(!res.IsSucceed)
+                            window.alert("Error : " + res.Error);
                     }}
                 />;
     return(
