@@ -27,6 +27,7 @@ import { ILogger } from "lib/MeterAppBase/utils/ILogger";
 import { CancellationToken, CancellationTokenFactory } from "lib/utils/CancellationToken";
 import { DataLogStoreFactory } from "../Model/DataLogStore";
 import { RunCommandModel } from "../Model/RunCommandModel";
+import { RunResultModel } from "../Model/RunResultModel";
 import { StateModel } from "../Model/StateModel";
 import { DataLoggerService } from "../Service/DataLoggerService";
 
@@ -63,14 +64,16 @@ export class DataLoggerController
             try
             {
                 await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);
-                res.send({ok: true, error:""});
+                const result : RunResultModel = {IsSucceed : true, Error : ""}; 
+                res.send(result);
             }
             catch(e)
             {
                 if(e instanceof Error)
                 {
                     console.log(e);
-                    res.send({ok: false, error:e.message});
+                    const result : RunResultModel = {IsSucceed : false, Error : e.message}; 
+                    res.send(result);
                 }
                 else
                     throw e;
