@@ -48,6 +48,7 @@ export class DataLoggerController
         let runningCommand : RunCommandModel = {DataStoreInterval : 0, DataStoreSize : 0, ParameterCodeList : [], WebsocketMessageInterval : 0}
 
         app.get('/api/store', (req, res) => res.send(JSON.stringify(store.Store)));
+        app.get('/api/store/codelist', (req, res) => res.send(JSON.stringify(Object.keys(store.Store.value))));
         app.get('/api/setting/available_code_list', (req, res) => res.send(service.getAvailableParameterCodeList()));
         app.get('/api/state', (req, res) => 
         {
