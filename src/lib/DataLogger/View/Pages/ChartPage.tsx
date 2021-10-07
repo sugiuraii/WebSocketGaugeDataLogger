@@ -22,16 +22,34 @@
  * THE SOFTWARE.
  */
 
-import { useState, VoidFunctionComponent } from "react";
+import { useEffect, useState, VoidFunctionComponent } from "react";
 import * as Echarts from 'echarts'
 import ReactEcharts from 'echarts-for-react'
 import React from "react";
-import { Button } from "react-bootstrap";
+import { Button, Form, ListGroup } from "react-bootstrap";
+import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 
 export const ChartPage : VoidFunctionComponent = () => 
 {
     const [chartOption, setChartOption] = useState<Echarts.EChartOption>();
-    
+    const [codeList, setCodeList] = useState<WebsocketParameterCode[]>([]);
+
+    // Query code list of store when the element is mounted
+    useEffect( () => {
+        let cleanedUp = false;
+        fetch("/api/store/codelist").then(res => res.json().then( (obj : WebsocketParameterCode[])  => { 
+            if(obj.length !== 0) // No code list => No data.
+            {
+                if(!cleanedUp)
+                    setCodeList([...obj]);
+            }
+        }));
+        const cleanUp = () => {cleanedUp = true};
+        return cleanUp;
+    }, []);
+
+    const codeListItems = codeList.map(c => <option key={c}>{c}</option>);
+
     const handleGetData = async () =>
     {
         const res = await fetch("/api/store");
@@ -46,13 +64,13 @@ export const ChartPage : VoidFunctionComponent = () =>
             seriesOption.push({ data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
         }
-
+        /*
         if(axisIndex == 0) // No data
         {
             setChartOption(undefined);
             return;            
         }
-
+        */
         const option: Echarts.EChartOption = {
             tooltip: {
                 show: true,
@@ -96,6 +114,9 @@ export const ChartPage : VoidFunctionComponent = () =>
         
     return(
         <>
+            <Form.Control as="select" >
+                {codeListItems}
+            </Form.Control>
             {chartElem}
             <Button variant="primary" onClick={handleGetData}>Get data</Button>
         </>
