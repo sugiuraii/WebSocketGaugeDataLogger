@@ -22,39 +22,116 @@
  * THE SOFTWARE.
  */
 
-import { useEffect, useState, VoidFunctionComponent } from "react";
+import { useEffect, useState, VoidFunctionComponent, FunctionComponent } from "react";
 import * as Echarts from 'echarts'
 import ReactEcharts from 'echarts-for-react'
 import React from "react";
-import { Button, Form, ListGroup } from "react-bootstrap";
+import { Button, Card, Form, ListGroup } from "react-bootstrap";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 
-export const ChartPage : VoidFunctionComponent = () => 
-{
+type CodeSelectorProps =
+    {
+        availableCodeList: WebsocketParameterCode[],
+        onSet: (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => void
+    }
+
+const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
+    const [selectedCode, setSelectedCode] = useState(p.availableCodeList[0]);
+
+    const [leftAxisCodeList, setLeftAxisCodeList] = useState<WebsocketParameterCode[]>([]);
+    const [rightAxisCodeList, setRightAxisCodeList] = useState<WebsocketParameterCode[]>([]);
+
+    const codeListItems = p.availableCodeList.map(c => <option key={c}>{c}</option>);
+    const leftAxisCodeListItems = leftAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
+    const rightAxisCodeListItems = rightAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
+    
+    const handleAddLeft = () => {
+        const newEnabledCode = [...leftAxisCodeList];  // Need to re-create array to update DOM.
+        if(!newEnabledCode.includes(selectedCode))
+            newEnabledCode.push(selectedCode);
+        setLeftAxisCodeList(newEnabledCode);
+    };
+
+    const handleAddRight = () => {
+        const newEnabledCode = [...rightAxisCodeList];  // Need to re-create array to update DOM.
+        if(!newEnabledCode.includes(selectedCode))
+            newEnabledCode.push(selectedCode);
+        setRightAxisCodeList(newEnabledCode);
+    };
+
+    const handleRemoveLeft = () =>{
+        const newEnabledCode = [...leftAxisCodeList].filter(c => c !== selectedCode);
+        setLeftAxisCodeList(newEnabledCode);
+    };
+
+    const handleRemoveRight = () =>{
+        const newEnabledCode = [...rightAxisCodeList].filter(c => c !== selectedCode);
+        setRightAxisCodeList(newEnabledCode);
+    };
+
+    const handleReset = () => {
+        setLeftAxisCodeList([]);
+        setRightAxisCodeList([]);
+    }
+
+    return (
+        <>
+            <Card>
+                <Card.Header>Plot data select</Card.Header>
+                <Card>
+                    <Card.Header>Code select</Card.Header>
+                    <Card.Body>
+                        <Form.Control as="select" value={selectedCode} onChange={e => setSelectedCode(e.target.value as WebsocketParameterCode)}>
+                            {codeListItems}
+                        </Form.Control>
+                        <Button variant="primary" onClick={handleAddLeft}>Add to left axis</Button>
+                        <Button variant="secondary" onClick={handleRemoveLeft}>Remove from left axis</Button>
+                        <Button variant="primary" onClick={handleAddRight}>Add to right axis</Button>
+                        <Button variant="secondary" onClick={handleRemoveRight}>Remove from left axis</Button>
+                        <Button variant="danger" onClick={handleReset}>Reset</Button>
+                    </Card.Body>
+                </Card>
+                <Card>
+                    <Card>
+                        <Card.Header>Left axis</Card.Header>
+                        <Card.Body><ListGroup>{leftAxisCodeListItems}</ListGroup></Card.Body>
+                    </Card>
+                    <Card>
+                        <Card.Header>Right axis</Card.Header>
+                        <Card.Body><ListGroup>{rightAxisCodeListItems}</ListGroup></Card.Body>
+                    </Card>
+                </Card>
+                <Button variant="primary" onClick={onSet}>Add chart</Button>
+            </Card>
+        </>
+    )
+}
+
+export const ChartPage: VoidFunctionComponent = () => {
     const [chartOption, setChartOption] = useState<Echarts.EChartOption>();
-    const [codeList, setCodeList] = useState<WebsocketParameterCode[]>([]);
+    const [availableCodeList, setAvailableCodeList] = useState<WebsocketParameterCode[]>([]);
+
 
     // Query code list of store when the element is mounted
-    useEffect( () => {
+    useEffect(() => {
         let cleanedUp = false;
-        fetch("/api/store/codelist").then(res => res.json().then( (obj : WebsocketParameterCode[])  => { 
-            if(obj.length !== 0) // No code list => No data.
+        fetch("/api/store/codelist").then(res => res.json().then((obj: WebsocketParameterCode[]) => {
+            if (obj.length !== 0) // No code list => No data.
             {
-                if(!cleanedUp)
-                    setCodeList([...obj]);
+                if (!cleanedUp)
+                    setAvailableCodeList([...obj]);
             }
         }));
-        const cleanUp = () => {cleanedUp = true};
+        const cleanUp = () => { cleanedUp = true };
         return cleanUp;
     }, []);
 
-    const codeListItems = codeList.map(c => <option key={c}>{c}</option>);
+    const codeListItems = availableCodeList.map(c => <option key={c}>{c}</option>);
 
-    const handleGetData = async () =>
-    {
+    const handleGetData = async () => {
         const res = await fetch("/api/store");
         const dataStore: { time: number[], value: { [key: string]: number[] } } = await res.json();
-    
+
         const yAxisOption: Echarts.EChartOption.YAxis[] = [];
         const seriesOption: Echarts.EChartOption.Series[] = [];
         let axisIndex = 0;
@@ -95,24 +172,24 @@ export const ChartPage : VoidFunctionComponent = () =>
             }]
             */
         };
-        
+
         setChartOption(option);
     }
- 
-    const chartElem = (chartOption === undefined) ? 
-                    (<div>Data is not available.</div>) 
-                    :
-                    (<ReactEcharts
-                        option={chartOption}
-                        notMerge={true}
-                        lazyUpdate={true}
-                        theme={"theme_name"}
-                        //onChartReady={this.onChartReadyCallback}
-                        //onEvents={EventsDict}
-                        //opts={ }
-                    />);
-        
-    return(
+
+    const chartElem = (chartOption === undefined) ?
+        (<div>Data is not available.</div>)
+        :
+        (<ReactEcharts
+            option={chartOption}
+            notMerge={true}
+            lazyUpdate={true}
+            theme={"theme_name"}
+        //onChartReady={this.onChartReadyCallback}
+        //onEvents={EventsDict}
+        //opts={ }
+        />);
+
+    return (
         <>
             <Form.Control as="select" >
                 {codeListItems}
