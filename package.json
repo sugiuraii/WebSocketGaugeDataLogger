@@ -5,7 +5,7 @@
   "main": "dist/bundle.js",
   "scripts": {
     "build-server": "npx webpack",
-    "build-client": "cd src/echart-test && npx webpack"
+    "build-client": "cd src/pages && npx webpack"
   },
   "author": "K.Sz2",
   "license": "MIT",
