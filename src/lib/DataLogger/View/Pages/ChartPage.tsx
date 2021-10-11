@@ -28,6 +28,7 @@ import ReactEcharts from 'echarts-for-react'
 import React from "react";
 import { Button, Card, Form, ListGroup } from "react-bootstrap";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
+import { ChartPanel } from "../Parts/ChartPanel";
 
 type CodeSelectorProps =
     {
@@ -161,26 +162,32 @@ export const ChartPage: VoidFunctionComponent = () => {
 
         const newChartOptions = [...chartOptions];
         newChartOptions.push(option);
-        setChartOptions(newChartOptions));
+        setChartOptions(newChartOptions);
     }
 
-    const chartElem = (chartOptions.length === 0) ?
-        (<div>Data is not available.</div>)
-        :
-        chartOptions.map( op => <ReactEcharts
-            option={op}
-            notMerge={true}
-            lazyUpdate={true}
-            theme={"theme_name"}
-        /> );
+    const handleRemoveChart = (index : number) => 
+    {
+        const newChartOptions = [...chartOptions];
+        newChartOptions.splice(index, 1);
+        setChartOptions(newChartOptions);        
+    }
 
+    const chartElem = () => 
+    {
+        if (chartOptions.length === 0)
+            return (<div>Data is not available.</div>);
+        else
+        {
+            const charts : JSX.Element[] = [];
+            for(let i = 0; i < chartOptions.length; i++)
+                charts.push(<ChartPanel  option={chartOptions[i]} onClose={()=>handleRemoveChart(i)} />)
+        }
+    }
+    
     return (
         <>
-            <Form.Control as="select" >
-                {codeListItems}
-            </Form.Control>
-            {chartElem}
-            <Button variant="primary" onClick={handleAddChart}>Get data</Button>
+            <CodeSelector availableCodeList={availableCodeList} onSet={(leftAxisCodeList, rightAxisCodeList)=>handleAddChart(leftAxisCodeList, rightAxisCodeList) } />
+            {chartElem()}
         </>
     )
 }
