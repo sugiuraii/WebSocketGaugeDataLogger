@@ -27,8 +27,8 @@ import { StateModel } from "lib/DataLogger/Model/StateModel";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 import React from "react";
 import { useEffect, useState, FunctionComponent } from "react";
-import { RunCommandControl } from "../Parts/RunCommandControl";
-import { RunStateControl } from "../Parts/RunStateControl";
+import { RunCommandControl } from "../Components/RunCommandControl";
+import { RunStateControl } from "../Components/RunStateControl";
 
 export type ControlPageProps = 
 {

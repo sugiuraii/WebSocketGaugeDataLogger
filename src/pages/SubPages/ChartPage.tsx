@@ -28,7 +28,7 @@ import ReactEcharts from 'echarts-for-react'
 import React from "react";
 import { Button, Card, Form, ListGroup } from "react-bootstrap";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
-import { ChartPanel } from "../Parts/ChartPanel";
+import { ChartPanel } from "../Components/ChartPanel";
 
 type CodeSelectorProps =
     {
