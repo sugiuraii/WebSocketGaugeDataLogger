@@ -5,8 +5,8 @@ import ReactEcharts from 'echarts-for-react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { Container, Nav, Navbar } from 'react-bootstrap';
-import { ControlPage } from 'lib/DataLogger/View/Pages/ControlPage';
-import { ChartPage } from 'lib/DataLogger/View/Pages/ChartPage';
+import { ControlPage } from 'pages/SubPages/ControlPage';
+import { ChartPage } from 'pages/SubPages/ChartPage';
 
 const run = async () => {
     const container = document.getElementById('contents');
