@@ -12,8 +12,8 @@ const run = async () => {
     const container = document.getElementById('contents');
     
     const parameterCodeListToSelect = await(await fetch('/api/setting/available_code_list')).json();
-    const availableCodeList =await(await fetch("/api/store/codelist")).json();
-    const chartElem = () => <ChartPage availableCodeList={availableCodeList}/>; 
+
+    const chartElem = () => <ChartPage />; 
     const controlElem = () => <ControlPage parameterCodeListToSelect={parameterCodeListToSelect}/>;
 
     ReactDOM.render
