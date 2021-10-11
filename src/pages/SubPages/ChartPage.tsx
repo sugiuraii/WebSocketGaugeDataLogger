@@ -22,9 +22,8 @@
  * THE SOFTWARE.
  */
 
-import { useEffect, useState, VoidFunctionComponent, FunctionComponent } from "react";
+import {  useState, VoidFunctionComponent, FunctionComponent } from "react";
 import * as Echarts from 'echarts'
-import ReactEcharts from 'echarts-for-react'
 import React from "react";
 import { Button, Card, Form, ListGroup } from "react-bootstrap";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
@@ -32,20 +31,25 @@ import { ChartPanel } from "../Components/ChartPanel";
 
 type CodeSelectorProps =
     {
-        onGetAvailableCode: () => void,
-        availableCodeList: WebsocketParameterCode[],
         onSet: (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => void
     }
 
 const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
-    const [selectedCode, setSelectedCode] = useState<WebsocketParameterCode>(p.availableCodeList[0]);
-
+    const [selectedCode, setSelectedCode] = useState<WebsocketParameterCode>();
     const [leftAxisCodeList, setLeftAxisCodeList] = useState<WebsocketParameterCode[]>([]);
     const [rightAxisCodeList, setRightAxisCodeList] = useState<WebsocketParameterCode[]>([]);
+    const [availableCodeList, setAvailableCodeList] = useState<WebsocketParameterCode[]>([]);
 
-    const codeListItems = p.availableCodeList.map(c => <option key={c}>{c}</option>);
+    const codeListItems = availableCodeList.map(c => <option key={c}>{c}</option>);
     const leftAxisCodeListItems = leftAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
     const rightAxisCodeListItems = rightAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
+
+    const getAvailableCodeList = async () =>
+    {
+        const codeList: WebsocketParameterCode[] = await(await fetch("/api/store/codelist")).json();
+        setAvailableCodeList(codeList);
+        setSelectedCode(codeList[0]);
+    }
 
     const handleAddLeft = () => {
         if(selectedCode === undefined)
@@ -87,7 +91,7 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
                 <Card>
                     <Card.Header>Code select</Card.Header>
                     <Card.Body>
-                        <Button variant="primary" onClick={p.onGetAvailableCode}>Get code list</Button>
+                        <Button variant="primary" onClick={getAvailableCodeList}>Get code list</Button>
                         <Form.Control as="select" value={selectedCode} onChange={e => setSelectedCode(e.target.value as WebsocketParameterCode)}>
                             {codeListItems}
                         </Form.Control>
@@ -116,13 +120,6 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
 
 export const ChartPage: VoidFunctionComponent = () => {
     const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
-    const [availableCodeList, setAvailableCodeList] = useState<WebsocketParameterCode[]>([]);
-
-    const getAvailableCodeList = async () =>
-    {
-        const codeList: WebsocketParameterCode[] = await(await fetch("/api/store/codelist")).json();
-        setAvailableCodeList(codeList);        
-    }
 
     const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
         const res = await fetch("/api/store");
@@ -183,7 +180,7 @@ export const ChartPage: VoidFunctionComponent = () => {
     
     return (
         <>
-            <CodeSelector onGetAvailableCode={getAvailableCodeList} availableCodeList={availableCodeList} onSet={(leftAxisCodeList, rightAxisCodeList)=>handleAddChart(leftAxisCodeList, rightAxisCodeList) } />
+            <CodeSelector onSet={(leftAxisCodeList, rightAxisCodeList)=>handleAddChart(leftAxisCodeList, rightAxisCodeList) } />
             {chartElem()}
         </>
     )
