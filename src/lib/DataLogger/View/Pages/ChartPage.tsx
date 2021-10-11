@@ -108,25 +108,12 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
     )
 }
 
-export const ChartPage: VoidFunctionComponent = () => {
+export type ChartPageProps = {
+    availableCodeList : WebsocketParameterCode[]
+};
+
+export const ChartPage: FunctionComponent<ChartPageProps> = (p) => {
     const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
-    const [availableCodeList, setAvailableCodeList] = useState<WebsocketParameterCode[]>([]);
-
-    // Query code list of store when the element is mounted
-    useEffect(() => {
-        let cleanedUp = false;
-        fetch("/api/store/codelist").then(res => res.json().then((obj: WebsocketParameterCode[]) => {
-            if (obj.length !== 0) // No code list => No data.
-            {
-                if (!cleanedUp)
-                    setAvailableCodeList([...obj]);
-            }
-        }));
-        const cleanUp = () => { cleanedUp = true };
-        return cleanUp;
-    }, []);
-
-    const codeListItems = availableCodeList.map(c => <option key={c}>{c}</option>);
 
     const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
         const res = await fetch("/api/store");
@@ -186,7 +173,7 @@ export const ChartPage: VoidFunctionComponent = () => {
     
     return (
         <>
-            <CodeSelector availableCodeList={availableCodeList} onSet={(leftAxisCodeList, rightAxisCodeList)=>handleAddChart(leftAxisCodeList, rightAxisCodeList) } />
+            <CodeSelector availableCodeList={p.availableCodeList} onSet={(leftAxisCodeList, rightAxisCodeList)=>handleAddChart(leftAxisCodeList, rightAxisCodeList) } />
             {chartElem()}
         </>
     )
