@@ -149,7 +149,10 @@ export const ChartPage: VoidFunctionComponent = () => {
                 type: 'category',
                 data: dataStore.time,
                 name: 'time(sec)',
-                
+                axisLabel : {
+                    formatter: (x: number) => Math.floor(x)
+                }
+
             },
             yAxis: yAxisOption,
             series: seriesOption
