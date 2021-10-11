@@ -101,16 +101,15 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
                         <Card.Body><ListGroup>{rightAxisCodeListItems}</ListGroup></Card.Body>
                     </Card>
                 </Card>
-                <Button variant="primary" onClick={onSet}>Add chart</Button>
+                <Button variant="primary" onClick={() => p.onSet(leftAxisCodeList, rightAxisCodeList)}>Add chart</Button>
             </Card>
         </>
     )
 }
 
 export const ChartPage: VoidFunctionComponent = () => {
-    const [chartOption, setChartOption] = useState<Echarts.EChartOption>();
+    const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
     const [availableCodeList, setAvailableCodeList] = useState<WebsocketParameterCode[]>([]);
-
 
     // Query code list of store when the element is mounted
     useEffect(() => {
@@ -128,33 +127,29 @@ export const ChartPage: VoidFunctionComponent = () => {
 
     const codeListItems = availableCodeList.map(c => <option key={c}>{c}</option>);
 
-    const handleGetData = async () => {
+    const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
         const res = await fetch("/api/store");
         const dataStore: { time: number[], value: { [key: string]: number[] } } = await res.json();
 
         const yAxisOption: Echarts.EChartOption.YAxis[] = [];
         const seriesOption: Echarts.EChartOption.Series[] = [];
-        let axisIndex = 0;
 
-        for (let code in dataStore.value) {
-            yAxisOption.push({ type: 'value', name: code });
+        let axisIndex = 0;
+        for (let code in leftAxisCodeList) {
+            yAxisOption.push({ type: 'value', name: code, position:'left' });
             seriesOption.push({ data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
         }
-        /*
-        if(axisIndex == 0) // No data
-        {
-            setChartOption(undefined);
-            return;            
+        for (let code in rightAxisCodeList) {
+            yAxisOption.push({ type: 'value', name: code, position:'right' });
+            seriesOption.push({ data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
+            axisIndex++;
         }
-        */
+
         const option: Echarts.EChartOption = {
             tooltip: {
                 show: true,
-                trigger: 'axis'//,
-                //position: function (pt) {
-                //    return [pt[0], '10%'];
-                //}
+                trigger: 'axis'
             },
             xAxis: {
                 type: 'category',
@@ -162,32 +157,22 @@ export const ChartPage: VoidFunctionComponent = () => {
             },
             yAxis: yAxisOption,
             series: seriesOption
-            /*
-            yAxis: {
-                type: 'value'
-            },
-            series: [{
-                data: dataStore.value,
-                type: 'line'
-            }]
-            */
         };
 
-        setChartOption(option);
+        const newChartOptions = [...chartOptions];
+        newChartOptions.push(option);
+        setChartOptions(newChartOptions));
     }
 
-    const chartElem = (chartOption === undefined) ?
+    const chartElem = (chartOptions.length === 0) ?
         (<div>Data is not available.</div>)
         :
-        (<ReactEcharts
-            option={chartOption}
+        chartOptions.map( op => <ReactEcharts
+            option={op}
             notMerge={true}
             lazyUpdate={true}
             theme={"theme_name"}
-        //onChartReady={this.onChartReadyCallback}
-        //onEvents={EventsDict}
-        //opts={ }
-        />);
+        /> );
 
     return (
         <>
@@ -195,7 +180,7 @@ export const ChartPage: VoidFunctionComponent = () => {
                 {codeListItems}
             </Form.Control>
             {chartElem}
-            <Button variant="primary" onClick={handleGetData}>Get data</Button>
+            <Button variant="primary" onClick={handleAddChart}>Get data</Button>
         </>
     )
 }
