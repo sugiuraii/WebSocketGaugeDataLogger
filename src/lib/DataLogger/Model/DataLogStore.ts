@@ -36,9 +36,10 @@ export class DataLogStoreFactory
     };
 }
 
-
 class MemoryDataLogStore implements DataLogStore
 {
+    private readonly timeunit = 0.001; // Time unit is ms.s
+
     private readonly timeArray : number[] = [];
     private readonly valueArray : {[key : string] : number[]} = {};
     private readonly maxStoreSize : number;
@@ -58,7 +59,7 @@ class MemoryDataLogStore implements DataLogStore
             Object.keys(this.valueArray).forEach(key => this.valueArray[key].shift());   
         }
 
-        this.timeArray.push(time);
+        this.timeArray.push(time*this.timeunit);
 
         if(Object.keys(this.valueArray).length === 0) // Registrate intial sample => Register key.
         {
