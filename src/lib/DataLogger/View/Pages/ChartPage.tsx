@@ -123,12 +123,12 @@ export const ChartPage: FunctionComponent<ChartPageProps> = (p) => {
         const seriesOption: Echarts.EChartOption.Series[] = [];
 
         let axisIndex = 0;
-        for (let code in leftAxisCodeList) {
+        for (let code of leftAxisCodeList) {
             yAxisOption.push({ type: 'value', name: code, position:'left' });
             seriesOption.push({ data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
         }
-        for (let code in rightAxisCodeList) {
+        for (let code of rightAxisCodeList) {
             yAxisOption.push({ type: 'value', name: code, position:'right' });
             seriesOption.push({ data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
@@ -167,7 +167,8 @@ export const ChartPage: FunctionComponent<ChartPageProps> = (p) => {
         {
             const charts : JSX.Element[] = [];
             for(let i = 0; i < chartOptions.length; i++)
-                charts.push(<ChartPanel  option={chartOptions[i]} onClose={()=>handleRemoveChart(i)} />)
+                charts.push(<ChartPanel  option={chartOptions[i]} onClose={()=>handleRemoveChart(i)} />);
+            return charts;
         }
     }
     
