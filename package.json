@@ -5,7 +5,8 @@
   "main": "dist/bundle.js",
   "scripts": {
     "build-server": "npx webpack",
-    "build-client": "cd src/pages && npx webpack"
+    "build-client": "cd src/pages && npx webpack",
+    "debug-client": "cd src/pages && npx webpack --watch"
   },
   "author": "K.Sz2",
   "license": "MIT",
