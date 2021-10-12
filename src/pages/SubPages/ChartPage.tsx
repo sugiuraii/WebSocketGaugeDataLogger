@@ -196,7 +196,7 @@ export const ChartPage: VoidFunctionComponent = () => {
         {
             const charts : JSX.Element[] = [];
             for(let i = 0; i < chartOptions.length; i++)
-                charts.push(<ChartPanel  option={chartOptions[i]} onClose={()=>handleRemoveChart(i)} />);
+                charts.push(<ChartPanel key={i} option={chartOptions[i]} onClose={()=>handleRemoveChart(i)} />);
             return charts;
         }
     }
