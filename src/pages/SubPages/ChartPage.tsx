@@ -161,6 +161,10 @@ export const ChartPage: VoidFunctionComponent = () => {
                 show: true,
                 trigger: 'axis'
             },
+            grid: {
+                left: 80*leftAxisIndex,
+                right: 80*rightAxisIndex
+            },
             xAxis: {
                 type: 'category',
                 data: dataStore.time,
