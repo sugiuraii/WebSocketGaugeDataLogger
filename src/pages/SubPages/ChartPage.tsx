@@ -143,14 +143,14 @@ export const ChartPage: VoidFunctionComponent = () => {
         let leftAxisIndex = 0;
         for (let code of leftAxisCodeList) {
             yAxisOption.push({ type: 'value', name: code, nameLocation:'center', nameGap:40, position:'left', offset: leftAxisIndex*80, axisLine: {show: true, lineStyle: {color: ColorArray[axisIndex]}}});
-            seriesOption.push({ data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
+            seriesOption.push({ name : code ,data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
             leftAxisIndex++;
         }
         let rightAxisIndex = 0;
         for (let code of rightAxisCodeList) {
             yAxisOption.push({ type: 'value', name: code, nameLocation:'center', nameGap:40, position:'right' ,offset: rightAxisIndex*80, axisLine: {show: true, lineStyle: {color: ColorArray[axisIndex]}}});
-            seriesOption.push({ data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
+            seriesOption.push({ name : code, data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
             rightAxisIndex++;
         }
