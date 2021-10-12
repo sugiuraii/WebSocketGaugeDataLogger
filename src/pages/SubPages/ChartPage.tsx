@@ -22,10 +22,10 @@
  * THE SOFTWARE.
  */
 
-import {  useState, VoidFunctionComponent, FunctionComponent } from "react";
+import { useState, VoidFunctionComponent, FunctionComponent } from "react";
 import * as Echarts from 'echarts'
 import React from "react";
-import { Button, Card, Form, ListGroup } from "react-bootstrap";
+import { Button, Card, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 import { ChartPanel } from "../Components/ChartPanel";
 
@@ -44,37 +44,36 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
     const leftAxisCodeListItems = leftAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
     const rightAxisCodeListItems = rightAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
 
-    const getAvailableCodeList = async () =>
-    {
-        const codeList: WebsocketParameterCode[] = await(await fetch("/api/store/codelist")).json();
+    const getAvailableCodeList = async () => {
+        const codeList: WebsocketParameterCode[] = await (await fetch("/api/store/codelist")).json();
         setAvailableCodeList(codeList);
         setSelectedCode(codeList[0]);
     }
 
     const handleAddLeft = () => {
-        if(selectedCode === undefined)
+        if (selectedCode === undefined)
             return;
         const newEnabledCode = [...leftAxisCodeList];  // Need to re-create array to update DOM.
-        if(!newEnabledCode.includes(selectedCode))
+        if (!newEnabledCode.includes(selectedCode))
             newEnabledCode.push(selectedCode);
         setLeftAxisCodeList(newEnabledCode);
     };
 
     const handleAddRight = () => {
-        if(selectedCode === undefined)
+        if (selectedCode === undefined)
             return;
         const newEnabledCode = [...rightAxisCodeList];  // Need to re-create array to update DOM.
-        if(!newEnabledCode.includes(selectedCode))
+        if (!newEnabledCode.includes(selectedCode))
             newEnabledCode.push(selectedCode);
         setRightAxisCodeList(newEnabledCode);
     };
 
-    const handleRemoveLeft = () =>{
+    const handleRemoveLeft = () => {
         const newEnabledCode = [...leftAxisCodeList].filter(c => c !== selectedCode);
         setLeftAxisCodeList(newEnabledCode);
     };
 
-    const handleRemoveRight = () =>{
+    const handleRemoveRight = () => {
         const newEnabledCode = [...rightAxisCodeList].filter(c => c !== selectedCode);
         setRightAxisCodeList(newEnabledCode);
     };
@@ -131,44 +130,44 @@ export const ChartPage: VoidFunctionComponent = () => {
         let axisIndex = 0;
         let leftAxisIndex = 0;
         for (let code of leftAxisCodeList) {
-            yAxisOption.push({ type: 'value', name: code, nameLocation:'center', nameGap:40, position:'left', offset: leftAxisIndex*80, axisLine: {show: true}});
-            seriesOption.push({ name : code ,data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
+            yAxisOption.push({ type: 'value', name: code, nameLocation: 'center', nameGap: 40, position: 'left', offset: leftAxisIndex * 80, axisLine: { show: true } });
+            seriesOption.push({ name: code, data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
             leftAxisIndex++;
         }
         let rightAxisIndex = 0;
         for (let code of rightAxisCodeList) {
-            yAxisOption.push({ type: 'value', name: code, nameLocation:'center', nameGap:40, position:'right' ,offset: rightAxisIndex*80, axisLine: {show: true}});
-            seriesOption.push({ name : code, data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
+            yAxisOption.push({ type: 'value', name: code, nameLocation: 'center', nameGap: 40, position: 'right', offset: rightAxisIndex * 80, axisLine: { show: true } });
+            seriesOption.push({ name: code, data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
             rightAxisIndex++;
         }
 
         const option: Echarts.EChartOption = {
-            legend: {show: true},
+            legend: { show: true },
             tooltip: {
                 show: true,
                 trigger: 'axis'
             },
             grid: {
-                left: 80*leftAxisIndex,
-                right: 80*rightAxisIndex
+                left: 80 * leftAxisIndex,
+                right: 80 * rightAxisIndex
             },
             toolbox: {
                 feature: {
-                  dataView: { show: true, readOnly: false },
-                  restore: { show: true },
-                  saveAsImage: { show: true }
+                    dataView: { show: true, readOnly: false },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
                 }
             },
             xAxis: {
                 type: 'category',
                 data: dataStore.time,
                 name: 'time(sec)',
-                nameLocation : 'center',
-                nameGap : 30,
-                axisLabel : {
-                    formatter: (x: number) => Math.floor(x*10)/10
+                nameLocation: 'center',
+                nameGap: 30,
+                axisLabel: {
+                    formatter: (x: number) => Math.floor(x * 10) / 10
                 }
 
             },
@@ -181,30 +180,35 @@ export const ChartPage: VoidFunctionComponent = () => {
         setChartOptions(newChartOptions);
     }
 
-    const handleRemoveChart = (index : number) => 
-    {
+    const handleRemoveChart = (index: number) => {
         const newChartOptions = [...chartOptions];
         newChartOptions.splice(index, 1);
-        setChartOptions(newChartOptions);        
+        setChartOptions(newChartOptions);
     }
 
-    const chartElem = () => 
-    {
+    const chartElem = () => {
         if (chartOptions.length === 0)
             return (<div>Data is not available.</div>);
-        else
-        {
-            const charts : JSX.Element[] = [];
-            for(let i = 0; i < chartOptions.length; i++)
-                charts.push(<ChartPanel key={i} option={chartOptions[i]} onClose={()=>handleRemoveChart(i)} />);
+        else {
+            const charts: JSX.Element[] = [];
+            for (let i = 0; i < chartOptions.length; i++)
+                charts.push(<ChartPanel key={i} option={chartOptions[i]} onClose={() => handleRemoveChart(i)} />);
             return charts;
         }
     }
-    
+
     return (
         <>
-            <CodeSelector onSet={(leftAxisCodeList, rightAxisCodeList)=>handleAddChart(leftAxisCodeList, rightAxisCodeList) } />
-            {chartElem()}
+            <Container>
+                <Row>
+                    <Col sm={4}>
+                        <CodeSelector onSet={(leftAxisCodeList, rightAxisCodeList) => handleAddChart(leftAxisCodeList, rightAxisCodeList)} />
+                    </Col>
+                    <Col sm={8}>
+                        {chartElem()}
+                    </Col>
+                </Row>
+            </Container>
         </>
     )
 }
