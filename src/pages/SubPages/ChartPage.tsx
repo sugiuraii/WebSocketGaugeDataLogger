@@ -154,6 +154,13 @@ export const ChartPage: VoidFunctionComponent = () => {
                 left: 80*leftAxisIndex,
                 right: 80*rightAxisIndex
             },
+            toolbox: {
+                feature: {
+                  dataView: { show: true, readOnly: false },
+                  restore: { show: true },
+                  saveAsImage: { show: true }
+                }
+            },
             xAxis: {
                 type: 'category',
                 data: dataStore.time,
