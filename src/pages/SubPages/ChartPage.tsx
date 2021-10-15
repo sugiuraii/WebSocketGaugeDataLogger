@@ -199,7 +199,7 @@ export const ChartPage: VoidFunctionComponent = () => {
 
     return (
         <>
-            <Container>
+            <Container fluid>
                 <Row>
                     <Col sm={4}>
                         <CodeSelector onSet={(leftAxisCodeList, rightAxisCodeList) => handleAddChart(leftAxisCodeList, rightAxisCodeList)} />
