@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-import { useState, VoidFunctionComponent, FunctionComponent } from "react";
+import { useState, VoidFunctionComponent, FunctionComponent, useEffect } from "react";
 import * as Echarts from 'echarts'
 import React from "react";
 import { Button, Card, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
@@ -31,6 +31,7 @@ import { ChartPanel } from "../Components/ChartPanel";
 
 type CodeSelectorProps =
     {
+        codeToSelect : WebsocketParameterCode[],
         onSet: (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => void
     }
 
@@ -38,18 +39,12 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
     const [selectedCode, setSelectedCode] = useState<WebsocketParameterCode>();
     const [leftAxisCodeList, setLeftAxisCodeList] = useState<WebsocketParameterCode[]>([]);
     const [rightAxisCodeList, setRightAxisCodeList] = useState<WebsocketParameterCode[]>([]);
-    const [availableCodeList, setAvailableCodeList] = useState<WebsocketParameterCode[]>([]);
 
-    const codeListItems = availableCodeList.map(c => <option key={c}>{c}</option>);
+    const codeListItems = p.codeToSelect.map(c => <option key={c}>{c}</option>);
+    codeListItems.unshift(<option key={"---"}>---</option>);
     const leftAxisCodeListItems = leftAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
     const rightAxisCodeListItems = rightAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
-
-    const getAvailableCodeList = async () => {
-        const codeList: WebsocketParameterCode[] = await (await fetch("/api/store/codelist")).json();
-        setAvailableCodeList(codeList);
-        setSelectedCode(codeList[0]);
-    }
-
+    
     const handleAddLeft = () => {
         if (selectedCode === undefined)
             return;
@@ -90,8 +85,10 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
                 <Card>
                     <Card.Header>Code select</Card.Header>
                     <Card.Body>
-                        <Button variant="primary" onClick={getAvailableCodeList}>Get code list</Button>
-                        <Form.Control as="select" value={selectedCode} onChange={e => setSelectedCode(e.target.value as WebsocketParameterCode)}>
+                        <Form.Control as="select" value={selectedCode} onChange={e => {
+                            if(e.target.value !== "---")
+                                setSelectedCode(e.target.value as WebsocketParameterCode);
+                        }}>
                             {codeListItems}
                         </Form.Control>
                         <Button variant="primary" onClick={handleAddLeft}>Add to left axis</Button>
@@ -119,6 +116,17 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
 
 export const ChartPage: VoidFunctionComponent = () => {
     const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
+    const [codeToSelect, setCodeToSelect] = useState<WebsocketParameterCode[]>([]);
+
+    useEffect( () => {
+        let cleanedUp = false;
+        fetch("/api/store/codelist").then(res => res.json().then(obj => { 
+            if(!cleanedUp)
+                setCodeToSelect(obj);
+            }));
+        const cleanUp = () => {cleanedUp = true};
+        return cleanUp;
+    },[]);
 
     const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
         const res = await fetch("/api/store");
@@ -202,7 +210,7 @@ export const ChartPage: VoidFunctionComponent = () => {
             <Container fluid>
                 <Row>
                     <Col sm={4}>
-                        <CodeSelector onSet={(leftAxisCodeList, rightAxisCodeList) => handleAddChart(leftAxisCodeList, rightAxisCodeList)} />
+                        <CodeSelector codeToSelect={codeToSelect} onSet={(leftAxisCodeList, rightAxisCodeList) => handleAddChart(leftAxisCodeList, rightAxisCodeList)} />
                     </Col>
                     <Col sm={8}>
                         {chartElem()}
