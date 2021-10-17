@@ -29,6 +29,7 @@ import { FunctionComponent, useState } from "react";
 import { Button, Card, Form, ListGroup } from "react-bootstrap";
 
 type RunCommandControlProps = {
+    defaultSetting : RunCommandModel,
     parameterCodeToSelect : WebsocketParameterCode[],
     onSet: (dat : RunCommandModel) => void
 }
@@ -37,11 +38,11 @@ export const RunCommandControl : FunctionComponent<RunCommandControlProps> = (p)
 {
     const selectOptions = p.parameterCodeToSelect.map(c => <option key={c}>{c}</option>);
 
-    const [dataStoreSize, setDataStoreSize] = useState(1000);
-    const [dataStoreInterval, setDataStoreInterval] = useState(100);
-    const [websocketmessageInterval, setWebsocketmessageInterval] = useState(0);
+    const [dataStoreSize, setDataStoreSize] = useState(p.defaultSetting.DataStoreSize);
+    const [dataStoreInterval, setDataStoreInterval] = useState(p.defaultSetting.DataStoreInterval);
+    const [websocketmessageInterval, setWebsocketmessageInterval] = useState(p.defaultSetting.WebsocketMessageInterval);
     const [selectedCode, setSelectedCode] = useState(p.parameterCodeToSelect[0]);
-    const [enabledCode, setEnabledCode] = useState<WebsocketParameterCode[]>([]);
+    const [enabledCode, setEnabledCode] = useState<WebsocketParameterCode[]>(p.defaultSetting.ParameterCodeList);
 
     const handleAdd = () =>{
         const newEnabledCode = [...enabledCode];  // Need to re-create array to update DOM.
