@@ -45,7 +45,7 @@ export class DataLoggerController
         const stopPollingInterval = 10;
         
         let store = DataLogStoreFactory.getMemoryDataLogStore(1);
-        let runningCommand : RunCommandModel = {DataStoreInterval : 0, DataStoreSize : 0, ParameterCodeList : [], WebsocketMessageInterval : 0}
+        let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, ParameterCodeList : [], WebsocketMessageInterval : 0}
 
         app.get('/api/store', (req, res) => res.send(JSON.stringify(store.Store)));
         app.get('/api/store/codelist', (req, res) => res.send(JSON.stringify(Object.keys(store.Store.value))));
