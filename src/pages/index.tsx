@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import * as Echarts from 'echarts'
 import ReactEcharts from 'echarts-for-react'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { HashRouter, Route, Switch } from 'react-router-dom';
+import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { Container, Nav, Navbar } from 'react-bootstrap';
 import { ControlPage } from 'pages/SubPages/ControlPage';
 import { ChartPage } from 'pages/SubPages/ChartPage';
@@ -33,6 +33,8 @@ const run = async () => {
                 </Container>
                 </Navbar>
                 <Switch>
+                    <Route exact path="/"><Redirect to="/control" /></Route>
+                    <Route exact path="/control" component={controlElem} />
                     <Route exact path="/control" component={controlElem} />
                     <Route exact path="/chart" component={chartElem} />
                 </Switch>
