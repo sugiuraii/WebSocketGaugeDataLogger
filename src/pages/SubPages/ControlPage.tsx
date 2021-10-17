@@ -51,6 +51,7 @@ export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
                 <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await fetch('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
                 :
                 <RunCommandControl
+                    defaultSetting={appState.RunningCommand}
                     parameterCodeToSelect={p.parameterCodeListToSelect}
                     onSet={ async (p) => 
                     {
