@@ -39,14 +39,13 @@ export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
     const [appState, setAppState] = useState<StateModel>({IsRunning : false, RunningCommand : {DataStoreInterval : 0, DataStoreSize : 0, ParameterCodeList :[], WebsocketMessageInterval : 0}});
     
     useEffect( () => {
-        let cleanedUp = false;
-        fetch("/api/state").then(res => res.json().then(obj => { 
-            if(!cleanedUp)
-                setAppState(obj);
-            }));
-        const cleanUp = () => {cleanedUp = true};
-        return cleanUp;
-    });
+        const interval = setInterval(() => {
+            fetch("/api/state").then(res => res.json().then(obj => { 
+                    setAppState(obj);
+                }));
+              }, 200);
+          return () => clearInterval(interval);
+    },[]);
 
     const pageElem = appState.IsRunning?
                 <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await fetch('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
