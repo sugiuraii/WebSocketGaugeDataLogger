@@ -32,11 +32,12 @@ import { RunStateControl } from "../Components/RunStateControl";
 
 export type ControlPageProps = 
 {
+    initialState : StateModel,
     parameterCodeListToSelect : WebsocketParameterCode[]
 };
 
 export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
-    const [appState, setAppState] = useState<StateModel>({IsRunning : false, RunningCommand : {DataStoreInterval : 0, DataStoreSize : 0, ParameterCodeList :[], WebsocketMessageInterval : 0}});
+    const [appState, setAppState] = useState<StateModel>(p.initialState);
     
     useEffect( () => {
         const interval = setInterval(() => {
