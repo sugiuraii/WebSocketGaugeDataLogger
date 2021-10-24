@@ -31,7 +31,7 @@ import { ChartPanel } from "../Components/ChartPanel";
 
 type CodeSelectorProps =
     {
-        codeToSelect : WebsocketParameterCode[],
+        codeToSelect: WebsocketParameterCode[],
         onSet: (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => void
     }
 
@@ -44,7 +44,7 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
     codeListItems.unshift(<option key={"---"}>---</option>);
     const leftAxisCodeListItems = leftAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
     const rightAxisCodeListItems = rightAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
-    
+
     const handleAddLeft = () => {
         if (selectedCode === undefined)
             return;
@@ -86,7 +86,7 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
                     <Card.Header>Code select</Card.Header>
                     <Card.Body>
                         <Form.Control as="select" value={selectedCode} onChange={e => {
-                            if(e.target.value !== "---")
+                            if (e.target.value !== "---")
                                 setSelectedCode(e.target.value as WebsocketParameterCode);
                         }}>
                             {codeListItems}
@@ -118,15 +118,15 @@ export const ChartPage: VoidFunctionComponent = () => {
     const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
     const [codeToSelect, setCodeToSelect] = useState<WebsocketParameterCode[]>([]);
 
-    useEffect( () => {
+    useEffect(() => {
         let cleanedUp = false;
-        fetch("/api/store/codelist").then(res => res.json().then(obj => { 
-            if(!cleanedUp)
+        fetch("/api/store/codelist").then(res => res.json().then(obj => {
+            if (!cleanedUp)
                 setCodeToSelect(obj);
-            }));
-        const cleanUp = () => {cleanedUp = true};
+        }));
+        const cleanUp = () => { cleanedUp = true };
         return cleanUp;
-    },[]);
+    }, []);
 
     const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
         const res = await fetch("/api/store");
@@ -165,6 +165,7 @@ export const ChartPage: VoidFunctionComponent = () => {
                 feature: {
                     dataView: { show: true, readOnly: false },
                     restore: { show: true },
+                    dataZoom: { yAxisIndex: 'none' },
                     saveAsImage: { show: true }
                 }
             },
@@ -180,6 +181,17 @@ export const ChartPage: VoidFunctionComponent = () => {
 
             },
             yAxis: yAxisOption,
+            dataZoom: [
+                {
+                    type: 'inside',
+                    start: 0,
+                    end: 10
+                },
+                {
+                    start: 0,
+                    end: 10
+                }
+            ],
             series: seriesOption
         };
 
