@@ -34,14 +34,18 @@ import { DataLoggerService } from "../Service/DataLoggerService";
 export class DataLoggerController
 {
     private logger : ILogger;
+    private service : DataLoggerService;
     constructor(logger? : ILogger)
     {
         this.logger = (logger === undefined)?(new ConsoleLogger()):logger;
+        this.service = new DataLoggerService();
     }
+
+    public get Service() : DataLoggerService { return this.service }
 
     public register(app : Express) : void
     {
-        const service = new DataLoggerService();
+        const service = this.service;
         const stopPollingInterval = 10;
         
         let store = DataLogStoreFactory.getMemoryDataLogStore(1);
