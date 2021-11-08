@@ -25,9 +25,19 @@ const run = async () => {
     });
     */
     app.use(express.static('public'));
-    app.listen(3000);
+    const server = app.listen(3000);
     //await dataloggerService.run(ct, store, parameterCodeList);
+    const end = () => 
+    {
+        controller.Service.stop();
+        server.close();
+        setTimeout( ()=>process.exit() , 3000);
+    };
+    
+    process.on('SIGTERM', end);
+    process.on('SIGINT', end);
 }
+
 
 (async function main() {
     await run();
