@@ -41,6 +41,6 @@ const run = async () => {
 
 (async function main() {
     await run();
-    console.log(`End`);
+    console.log(`Started`);
 })();
 
