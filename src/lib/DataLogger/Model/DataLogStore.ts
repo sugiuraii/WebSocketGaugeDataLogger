@@ -37,7 +37,7 @@ export function convertDataLogStoreToCsv(store : DataLogStore) : string
     let outString  = "";
     // Create Header
     outString += "Time,";
-    outString += Object.keys(store.Store.value).join() + '\n';
+    outString += (Object.keys(store.Store.value).join() + '\n');
 
     const datLength = timeArray.length;
     for(let i = 0; i < datLength; i++)
@@ -46,7 +46,7 @@ export function convertDataLogStoreToCsv(store : DataLogStore) : string
         singleSampleDat.push(timeArray[i]);
         for(let key of Object.keys(valueArray))
             singleSampleDat.push(valueArray[key][i]);
-        outString += singleSampleDat.map(num => num.toString()).join() + '\n';
+        outString += (singleSampleDat.map(num => num.toString()).join() + '\n');
     }
 
     return outString;
