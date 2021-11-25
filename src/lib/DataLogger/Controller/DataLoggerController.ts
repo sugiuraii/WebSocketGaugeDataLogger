@@ -25,7 +25,7 @@ import { Express } from "express";
 import { ConsoleLogger } from "lib/MeterAppBase/utils/ConsoleLogger";
 import { ILogger } from "lib/MeterAppBase/utils/ILogger";
 import { CancellationToken, CancellationTokenFactory } from "lib/utils/CancellationToken";
-import { DataLogStoreFactory } from "../Model/DataLogStore";
+import { convertDataLogStoreToCsv, DataLogStoreFactory } from "../Model/DataLogStore";
 import { RunCommandModel } from "../Model/RunCommandModel";
 import { RunResultModel } from "../Model/RunResultModel";
 import { StateModel } from "../Model/StateModel";
@@ -52,6 +52,7 @@ export class DataLoggerController
         let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, ParameterCodeList : [], WebsocketMessageInterval : 0}
 
         app.get('/api/store', (req, res) => res.send(JSON.stringify(store.Store)));
+        app.get('/api/store/getAsCSV',  (req, res) => res.send(convertDataLogStoreToCsv(store)));
         app.get('/api/store/codelist', (req, res) => res.send(JSON.stringify(Object.keys(store.Store.value))));
         app.get('/api/setting/available_code_list', (req, res) => res.send(service.getAvailableParameterCodeList()));
         app.get('/api/state', (req, res) => 
