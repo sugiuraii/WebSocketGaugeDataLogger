@@ -1,7 +1,7 @@
 {
-  "name": "websocketgauge-datalogger",
+  "name": "websocketgauge-datalogger-server",
   "version": "1.0.0",
-  "description": "Data logger application for WebSocketGauge",
+  "description": "Data logger application for WebSocketGauge (server side)",
   "main": "dist/bundle.js",
   "scripts": {
     "build-server": "npx webpack",
