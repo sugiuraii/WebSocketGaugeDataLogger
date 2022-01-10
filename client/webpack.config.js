@@ -1,10 +1,10 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const pjrootPath = path.resolve(__dirname, "../../");
+const pjrootPath = __dirname;
 
 module.exports = {
-  entry: './index.tsx',
+  entry: './src/index.tsx',
   cache: true,
   mode: 'development',
   devtool: 'source-map',
