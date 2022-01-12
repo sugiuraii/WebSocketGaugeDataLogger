@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "Data logger application for WebSocketGauge (client side)",
   "scripts": {
-    "build-server": "npx webpack",
-    "build-client": "cd src/pages && npx webpack",
-    "debug-client": "cd src/pages && npx webpack --watch"
+    "build": "npx webpack",
+    "debug": "npx webpack --watch"
   },
   "author": "K.Sz2",
   "license": "MIT",
