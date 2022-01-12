@@ -41,7 +41,11 @@ const run = async () => {
     app.use(express.static('public'));
     const server = app.listen(config.port);
     const end = () => {
-        controller.Service.stop();
+        if(controller.Service.IsRunning)
+        {
+            logger.warn("Server is terminated while the logging service is still running.");
+            controller.Service.stop();
+        }
         server.close();
         setTimeout(() => process.exit(), 3000);
         logger.info("Server is stoppedd");
