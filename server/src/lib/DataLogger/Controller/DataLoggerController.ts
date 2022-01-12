@@ -23,21 +23,19 @@
  */
 import { Express } from "express";
 import { ConsoleLogger } from "lib/MeterAppBase/utils/ConsoleLogger";
-import { ILogger } from "lib/MeterAppBase/utils/ILogger";
-import { CancellationToken, CancellationTokenFactory } from "lib/utils/CancellationToken";
 import { convertDataLogStoreToCsv, DataLogStoreFactory } from "../Model/DataLogStore";
 import { RunCommandModel } from "../Model/RunCommandModel";
 import { RunResultModel } from "../Model/RunResultModel";
 import { StateModel } from "../Model/StateModel";
 import { DataLoggerService } from "../Service/DataLoggerService";
+import log4js from "log4js";
 
 export class DataLoggerController
 {
-    private logger : ILogger;
+    private logger = log4js.getLogger();
     private service : DataLoggerService;
-    constructor(logger? : ILogger)
+    constructor()
     {
-        this.logger = (logger === undefined)?(new ConsoleLogger()):logger;
         this.service = new DataLoggerService();
     }
 
@@ -65,7 +63,8 @@ export class DataLoggerController
         {
             const command : RunCommandModel = req.body;
             runningCommand = command;
-            this.logger.appendLog(JSON.stringify(command));
+            this.logger.info("Logger service is stated. Running command is ...");
+            this.logger.info(JSON.stringify(command));
             store = DataLogStoreFactory.getMemoryDataLogStore(command.DataStoreSize);
             try
             {
@@ -77,7 +76,7 @@ export class DataLoggerController
             {
                 if(e instanceof Error)
                 {
-                    console.log(e);
+                    this.logger.error(e);
                     const result : RunResultModel = {IsSucceed : false, Error : e.message}; 
                     res.send(result);
                 }
@@ -95,6 +94,7 @@ export class DataLoggerController
 
             const runState : StateModel = {IsRunning : service.IsRunning, RunningCommand : runningCommand};
             res.send(JSON.stringify(runState));
+            this.logger.info("Logger service is stopped.");
         });
     }
 }
