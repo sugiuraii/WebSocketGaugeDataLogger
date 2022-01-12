@@ -23,7 +23,6 @@
  */
 
 import { WebsocketObjectCollection, WebsocketObjectCollectionOption } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketObjectCollection";
-import { ConsoleLogger } from "lib/MeterAppBase/utils/ConsoleLogger";
 import * as DefaultAppSettings from "lib/MeterAppBase/DefaultAppSettings"
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 import { ReadModeCode } from "lib/WebSocket/WebSocketCommunication";
@@ -31,6 +30,7 @@ import { performance } from 'perf_hooks';
 import { ILogger } from "lib/MeterAppBase/utils/ILogger";
 import { CancellationToken, CancellationTokenFactory } from "lib/utils/CancellationToken";
 import { DataLogStore } from "../Model/DataLogStore";
+import { Log4jsLogger } from "lib/MeterAppBase/utils/Log4jsLogger";
 
 export class DataLoggerService
 {
@@ -42,7 +42,7 @@ export class DataLoggerService
 
     constructor(logger? : ILogger)
     {
-        this.Logger = (logger === undefined)?(new ConsoleLogger()): logger;
+        this.Logger = (logger === undefined)?(new Log4jsLogger()): logger;
         this.WSOption = DefaultAppSettings.getWebsocketCollectionOption();
     }
 

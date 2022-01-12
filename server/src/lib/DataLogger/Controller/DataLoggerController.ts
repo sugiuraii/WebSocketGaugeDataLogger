@@ -22,7 +22,6 @@
  * THE SOFTWARE.
  */
 import { Express } from "express";
-import { ConsoleLogger } from "lib/MeterAppBase/utils/ConsoleLogger";
 import { convertDataLogStoreToCsv, DataLogStoreFactory } from "../Model/DataLogStore";
 import { RunCommandModel } from "../Model/RunCommandModel";
 import { RunResultModel } from "../Model/RunResultModel";
