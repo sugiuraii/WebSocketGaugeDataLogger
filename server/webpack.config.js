@@ -5,14 +5,14 @@ const pjrootPath = path.resolve(__dirname);
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
-  entry: './src/WSClientTest.ts',
+  entry: './src/WebSocketDataLoggerServer.ts',
   cache: true,
   mode: 'development',
   devtool: 'source-map',
   target: 'node',
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: 'WebSocketDataLoggerServer.js',
     publicPath: ''
   },
   module: {
