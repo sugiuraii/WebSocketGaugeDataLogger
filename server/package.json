@@ -24,6 +24,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.0",
     "jsonc-parser": "^3.0.0",
+    "log4js": "^6.3.0",
     "pkg": "^5.5.1",
     "react": "^17.0.2",
     "react-bootstrap": "^2.1.0",
