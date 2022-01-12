@@ -1,17 +1,17 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const pjrootPath = path.resolve(__dirname, "../../");
+const pjrootPath = __dirname;
 
 module.exports = {
-  entry: './index.tsx',
+  entry: path.resolve(pjrootPath, 'src/index.tsx'),
   cache: true,
   mode: 'development',
   devtool: 'source-map',
   //target: 'node',
   output: {
     path: path.join(pjrootPath, 'dist/public'),
-    filename: 'charttest.js',
+    filename: 'index.js',
     publicPath: ''
   },
   module: {
@@ -57,7 +57,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: './index.html',
+      template: path.resolve(pjrootPath, 'src/index.html'),
     }),
   ],
 };
