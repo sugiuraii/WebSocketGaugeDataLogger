@@ -48,8 +48,17 @@ export class DataLoggerController
         let store = DataLogStoreFactory.getMemoryDataLogStore(1);
         let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, ParameterCodeList : [], WebsocketMessageInterval : 0}
 
-        app.get('/api/store', (req, res) => res.send(JSON.stringify(store.Store)));
-        app.get('/api/store/getAsCSV',  (req, res) => res.send(convertDataLogStoreToCsv(store)));
+        app.get('/api/store', (req, res) => 
+        {
+            res.send(JSON.stringify(store.Store));
+            this.logger.info("Data store is requested from " + req.headers.host);
+        });
+
+        app.get('/api/store/getAsCSV',  (req, res) => 
+        {
+            res.send(convertDataLogStoreToCsv(store))
+            this.logger.info("Data store is requested by csv format, from " + req.headers.host);
+        });
         app.get('/api/store/codelist', (req, res) => res.send(JSON.stringify(Object.keys(store.Store.value))));
         app.get('/api/setting/available_code_list', (req, res) => res.send(service.getAvailableParameterCodeList()));
         app.get('/api/state', (req, res) => 
