@@ -45,6 +45,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
+    "npm-check-updates": "^16.14.18",
     "prettier": "^2.5.1",
     "ts-loader": "^9.2.6",
     "tsconfig-paths": "^3.12.0",
