@@ -6,7 +6,12 @@
     "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "outDir": "./dist",
+    "moduleResolution": "node",
+    "noUnusedParameters":true,
+    "lib":["dom", "es2017"],
+    "rootDir": "."
   },
   "include" : ["**/*"],
   "exclude" : ["node_modules"]
