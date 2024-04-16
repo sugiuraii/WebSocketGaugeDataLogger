@@ -2,10 +2,11 @@
   "name": "websocketgauge-datalogger-server",
   "version": "1.0.0",
   "description": "Data logger application for WebSocketGauge (server side)",
-  "main": "dist/bundle.js",
+  "main": "dist/WebSocketDataLoggerServer.js",
   "scripts": {
     "build": "npx webpack",
     "debug": "npx webpack --watch",
+    "start": "cd dist; node WebSocketDataLoggerServer.js",
     "install-client": "cp -r ../client/dist/public ./dist/"
   },
   "author": "K.Sz2",
