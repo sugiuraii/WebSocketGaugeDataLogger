@@ -29,8 +29,8 @@ import { ReadModeCode } from "lib/WebSocket/WebSocketCommunication";
 import { performance } from 'perf_hooks';
 import { ILogger } from "lib/MeterAppBase/utils/ILogger";
 import { CancellationToken, CancellationTokenFactory } from "lib/utils/CancellationToken";
-import { DataLogStore } from "../Model/DataLogStore";
 import { Log4jsLogger } from "lib/MeterAppBase/utils/Log4jsLogger";
+import { DataLogStore } from "../DataLogStore/DataLogStore";
 
 export class DataLoggerService
 {

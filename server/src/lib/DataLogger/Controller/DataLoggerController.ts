@@ -22,12 +22,13 @@
  * THE SOFTWARE.
  */
 import { Express } from "express";
-import { convertDataLogStoreToCsv, DataLogStoreFactory } from "../Model/DataLogStore";
 import { RunCommandModel } from "../Model/RunCommandModel";
 import { RunResultModel } from "../Model/RunResultModel";
 import { StateModel } from "../Model/StateModel";
 import { DataLoggerService } from "../Service/DataLoggerService";
 import log4js from "log4js";
+import { DataLogStoreFactory } from "../DataLogStore/DataLogStoreFactory";
+import { convertDataLogStoreToCsv } from "../DataLogStore/DataLogStoreUtils";
 
 export class DataLoggerController
 {

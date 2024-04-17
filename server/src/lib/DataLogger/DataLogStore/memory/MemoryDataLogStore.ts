@@ -22,44 +22,9 @@
  * THE SOFTWARE.
  */
 
-export interface DataLogStore
-{
-    readonly Store : {time: number[], value : {[key : string] : number[]}};
-    pushSample(time : number, value : {[key : string] : number}) : void;
-    close() : void;
-}
+import { DataLogStore } from "../DataLogStore";
 
-export function convertDataLogStoreToCsv(store : DataLogStore) : string
-{
-    const timeArray = store.Store.time;
-    const valueArray = store.Store.value;
-
-    let outString  = "";
-    // Create Header
-    outString += "Time,";
-    outString += (Object.keys(store.Store.value).join() + '\n');
-
-    const datLength = timeArray.length;
-    for(let i = 0; i < datLength; i++)
-    {
-        const singleSampleDat : number[] = []; 
-        singleSampleDat.push(timeArray[i]);
-        for(let key of Object.keys(valueArray))
-            singleSampleDat.push(valueArray[key][i]);
-        outString += (singleSampleDat.map(num => num.toString()).join() + '\n');
-    }
-
-    return outString;
-}
-
-export class DataLogStoreFactory
-{
-    public static getMemoryDataLogStore(maxStoreSize : number) : DataLogStore {
-        return new MemoryDataLogStore(maxStoreSize)
-    };
-}
-
-class MemoryDataLogStore implements DataLogStore
+export class MemoryDataLogStore implements DataLogStore
 {
     private readonly timeunit = 0.001; // Time unit is ms.s
 
@@ -104,5 +69,3 @@ class MemoryDataLogStore implements DataLogStore
         // Do nothing.
     }
 }
-
-
