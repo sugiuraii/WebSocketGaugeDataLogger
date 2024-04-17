@@ -59,9 +59,9 @@ export class DataLoggerController
             res.send(convertDataLogStoreToCsv(store))
             this.logger.info("Data store is requested by csv format, from " + req.headers.host);
         });
-        app.get('/api/store/codelist', (req, res) => res.send(JSON.stringify(Object.keys(store.Store.value))));
-        app.get('/api/setting/available_code_list', (req, res) => res.send(service.getAvailableParameterCodeList()));
-        app.get('/api/state', (req, res) => 
+        app.get('/api/store/codelist', (_, res) => res.send(JSON.stringify(Object.keys(store.Store.value))));
+        app.get('/api/setting/available_code_list', (_, res) => res.send(service.getAvailableParameterCodeList()));
+        app.get('/api/state', (_, res) => 
         {
             const runState : StateModel = {IsRunning : service.IsRunning, RunningCommand : runningCommand};
             res.send(JSON.stringify(runState));
@@ -93,7 +93,7 @@ export class DataLoggerController
             }
         });
 
-        app.post('/api/stop', async(req, res) => 
+        app.post('/api/stop', async(_, res) => 
         {
             service.stop();
             while(!service.IsRunning) {

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import * as Echarts from 'echarts'
 import ReactEcharts from 'echarts-for-react'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Container, Nav, Navbar } from 'react-bootstrap';
 import { ControlPage } from 'SubPages/ControlPage';
 import { ChartPage } from 'SubPages/ChartPage';
@@ -13,8 +13,8 @@ const run = async () => {
     
     const parameterCodeListToSelect = await(await fetch('/api/setting/available_code_list')).json();
     const appState = await(await fetch("/api/state")).json();
-    const chartElem = () => <ChartPage />; 
-    const controlElem = () => <ControlPage initialState={appState} parameterCodeListToSelect={parameterCodeListToSelect}/>;
+    const chartElem = <ChartPage />; 
+    const controlElem = <ControlPage initialState={appState} parameterCodeListToSelect={parameterCodeListToSelect}/>;
 
     ReactDOM.render
         (
@@ -32,12 +32,11 @@ const run = async () => {
                     </Navbar.Collapse>
                 </Container>
                 </Navbar>
-                <Switch>
-                    <Route exact path="/"><Redirect to="/control" /></Route>
-                    <Route exact path="/control" component={controlElem} />
-                    <Route exact path="/control" component={controlElem} />
-                    <Route exact path="/chart" component={chartElem} />
-                </Switch>
+                <Routes>
+                    <Route path="/" element={controlElem} />
+                    <Route path="/control" element={controlElem} />
+                    <Route path="/chart" element={chartElem} />
+                </Routes>
             </HashRouter>                
             </>
             , container);
