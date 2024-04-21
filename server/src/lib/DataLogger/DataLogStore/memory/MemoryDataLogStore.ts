@@ -39,7 +39,7 @@ export class MemoryDataLogStore implements DataLogStore
         this.maxStoreSize = maxStoreSize;
     }
 
-    public async pushSample(time : number, value : {[key : string] : number})
+    public async pushSample(time : number, value : {[key : string] : number}): Promise<void>
     {
         if(this.timeArray.length >= this.maxStoreSize)
         {

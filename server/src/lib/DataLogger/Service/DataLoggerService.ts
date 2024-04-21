@@ -69,7 +69,7 @@ export class DataLoggerService
             const time = performance.now() - startTime;
             const value : {[key : string] : number}  =  {};
             parameterCodeList.forEach(code => value[code] = wsc.WSMapper.getValue(code as WebsocketParameterCode));
-            store.pushSample(time, value);
+            await store.pushSample(time, value);
             await new Promise(resolve => setTimeout(resolve, dataStoreInterval));
         }
         store.close();
