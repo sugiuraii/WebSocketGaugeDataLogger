@@ -31,7 +31,7 @@ export class MemoryDataLogStore implements DataLogStore
     private readonly timeArray : number[] = [];
     private readonly valueArray : {[key : string] : number[]} = {};
     private readonly maxStoreSize : number;
-    public get Store() : {time: number[], value : {[key : string] : number[]}} { return {time : this.timeArray, value : this.valueArray} }
+    public async getSamples() : Promise<{time: number[], value : {[key : string] : number[]}}> { return {time : this.timeArray, value : this.valueArray} }
     public get MaxStoreSize() : number {return this.maxStoreSize}
     
     constructor(maxStoreSize : number)
@@ -39,7 +39,7 @@ export class MemoryDataLogStore implements DataLogStore
         this.maxStoreSize = maxStoreSize;
     }
 
-    public async pushSample(time : number, value : {[key : string] : number})
+    public async pushSample(time : number, value : {[key : string] : number}): Promise<void>
     {
         if(this.timeArray.length >= this.maxStoreSize)
         {
@@ -64,7 +64,7 @@ export class MemoryDataLogStore implements DataLogStore
         }
     }
 
-    public close()
+    public async close()
     {
         // Do nothing.
     }
