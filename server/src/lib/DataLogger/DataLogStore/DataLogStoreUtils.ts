@@ -26,13 +26,13 @@ import { DataLogStore } from "./DataLogStore";
 
 export function convertDataLogStoreToCsv(store : DataLogStore) : string
 {
-    const timeArray = store.Store.time;
-    const valueArray = store.Store.value;
+    const timeArray = store.getSamples().time;
+    const valueArray = store.getSamples().value;
 
     let outString  = "";
     // Create Header
     outString += "Time,";
-    outString += (Object.keys(store.Store.value).join() + '\n');
+    outString += (Object.keys(store.getSamples().value).join() + '\n');
 
     const datLength = timeArray.length;
     for(let i = 0; i < datLength; i++)

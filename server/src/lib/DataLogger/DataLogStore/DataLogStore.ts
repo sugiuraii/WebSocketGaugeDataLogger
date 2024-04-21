@@ -24,7 +24,7 @@
 
 export interface DataLogStore
 {
-    readonly Store : {time: number[], value : {[key : string] : number[]}};
+    getSamples() : {time: number[], value : {[key : string] : number[]}};
     pushSample(time : number, value : {[key : string] : number}) : void;
     close() : void;
 }

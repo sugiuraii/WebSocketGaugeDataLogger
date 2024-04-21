@@ -31,7 +31,7 @@ export class MemoryDataLogStore implements DataLogStore
     private readonly timeArray : number[] = [];
     private readonly valueArray : {[key : string] : number[]} = {};
     private readonly maxStoreSize : number;
-    public get Store() : {time: number[], value : {[key : string] : number[]}} { return {time : this.timeArray, value : this.valueArray} }
+    public getSamples() : {time: number[], value : {[key : string] : number[]}} { return {time : this.timeArray, value : this.valueArray} }
     public get MaxStoreSize() : number {return this.maxStoreSize}
     
     constructor(maxStoreSize : number)

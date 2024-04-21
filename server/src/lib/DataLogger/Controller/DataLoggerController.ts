@@ -51,7 +51,7 @@ export class DataLoggerController
 
         app.get('/api/store', (req, res) => 
         {
-            res.send(JSON.stringify(store.Store));
+            res.send(JSON.stringify(store.getSamples()));
             this.logger.info("Data store is requested from " + req.headers.host);
         });
 
@@ -60,7 +60,7 @@ export class DataLoggerController
             res.send(convertDataLogStoreToCsv(store))
             this.logger.info("Data store is requested by csv format, from " + req.headers.host);
         });
-        app.get('/api/store/codelist', (_, res) => res.send(JSON.stringify(Object.keys(store.Store.value))));
+        app.get('/api/store/codelist', (_, res) => res.send(JSON.stringify(Object.keys(store.getSamples().value))));
         app.get('/api/setting/available_code_list', (_, res) => res.send(service.getAvailableParameterCodeList()));
         app.get('/api/state', (_, res) => 
         {
