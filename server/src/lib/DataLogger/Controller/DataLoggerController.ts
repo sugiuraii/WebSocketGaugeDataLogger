@@ -46,7 +46,7 @@ export class DataLoggerController
         const service = this.service;
         const stopPollingInterval = 10;
         
-        let store = DataLogStoreFactory.getMemoryDataLogStore(1);
+        let store = DataLogStoreFactory.getMemoryDataLogStore(["null"], 1);
         let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, ParameterCodeList : [], WebsocketMessageInterval : 0}
 
         app.get('/api/store', async (req, res) => 
@@ -75,7 +75,7 @@ export class DataLoggerController
             runningCommand = command;
             this.logger.info("Logger service is stated. Running command is ...");
             this.logger.info(JSON.stringify(command));
-            store = DataLogStoreFactory.getMemoryDataLogStore(command.DataStoreSize);
+            store = DataLogStoreFactory.getMemoryDataLogStore(command.ParameterCodeList, command.DataStoreSize);
             try
             {
                 await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);

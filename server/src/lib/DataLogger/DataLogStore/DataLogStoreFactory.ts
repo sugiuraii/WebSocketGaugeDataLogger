@@ -27,7 +27,7 @@ import { MemoryDataLogStore } from "./memory/MemoryDataLogStore";
 
 export class DataLogStoreFactory
 {
-    public static getMemoryDataLogStore(maxStoreSize : number) : DataLogStore {
-        return new MemoryDataLogStore(maxStoreSize)
+    public static getMemoryDataLogStore(keylist: string[], maxStoreSize : number) : DataLogStore {
+        return new MemoryDataLogStore(keylist, maxStoreSize)
     };
 }
