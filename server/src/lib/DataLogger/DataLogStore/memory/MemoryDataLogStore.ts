@@ -29,14 +29,20 @@ export class MemoryDataLogStore implements DataLogStore
     private readonly timeunit = 0.001; // Time unit is ms.s
 
     private readonly timeArray : number[] = [];
-    private readonly valueArray : {[key : string] : number[]} = {};
+    private readonly valueArray : {[key : string] : number[]};
     private readonly maxStoreSize : number;
+    private readonly keyList: string[];
+    
     public async getSamples() : Promise<{time: number[], value : {[key : string] : number[]}}> { return {time : this.timeArray, value : this.valueArray} }
     public get MaxStoreSize() : number {return this.maxStoreSize}
     
-    constructor(maxStoreSize : number)
+    constructor(keylist: string[], maxStoreSize : number)
     {
+        this.keyList = keylist;
         this.maxStoreSize = maxStoreSize;
+        this.valueArray = {};
+        for(let key of keylist)
+            this.valueArray[key] = [];   
     }
 
     public async pushSample(time : number, value : {[key : string] : number}): Promise<void>
@@ -48,19 +54,12 @@ export class MemoryDataLogStore implements DataLogStore
         }
 
         this.timeArray.push(time*this.timeunit);
-
-        if(Object.keys(this.valueArray).length === 0) // Registrate intial sample => Register key.
-        {
-            for(let key of Object.keys(value))
-                this.valueArray[key] = [];   
-        }
-
         for(let key of Object.keys(value))
         {
             if(this.valueArray[key])
                 this.valueArray[key].push(value[key])
             else
-                throw new Error("Key of " + key + " was not registered at first sample.");
+                throw new Error("Key of " + key + " is not exist in datastore.");
         }
     }
 
