@@ -64,7 +64,7 @@ export class MemoryDataLogStore implements DataLogStore
         }
     }
 
-    public close()
+    public async close()
     {
         // Do nothing.
     }
