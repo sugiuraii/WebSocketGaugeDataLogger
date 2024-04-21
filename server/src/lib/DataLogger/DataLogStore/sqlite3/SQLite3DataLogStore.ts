@@ -31,12 +31,16 @@ export class SQLite3DataLogStore implements DataLogStore {
     private readonly tablename: string;
     private readonly keylist: string[];
     private dirty = false;
-
+    // Value buffer to store previous value
+    private readonly valuebuffer: { [key: string]: number };
     constructor(database: Database, tablename: string, keylist: string[]) {
         this.database = database;
         this.tablename = tablename;
         this.keylist = keylist;
-
+        this.valuebuffer = {};
+        // Reset value buffer
+        for(let key in keylist)
+            this.valuebuffer[key] = 0;
     }
     // Wrapper of sqlite3 api to Promise
     private async runsqlAsync(db: Database, sql: string, ...params: any[]): Promise<Database> {
@@ -58,7 +62,7 @@ export class SQLite3DataLogStore implements DataLogStore {
     }
 
     public async getSamples(): Promise<{ time: number[], value: { [key: string]: number[] } }> {
-        const query = "SELECT time, " + this.keylist.join(', ') + " FROM " + this.tablename;
+        const query = "SELECT time, " + this.keylist.join(', ') + " FROM " + this.tablename + ";";
         const rows = await this.allsqlAsync(this.database, query);
         const time: number[] = [];
         const value: { [key: string]: number[] } = {};
@@ -74,19 +78,24 @@ export class SQLite3DataLogStore implements DataLogStore {
 
     public async pushSample(time: number, value: { [key: string]: number }): Promise<void> {
         // Create table
-        if (!this.dirty)
-            this.runsqlAsync(this.database, "CREATE TABLE " + this.tablename + " (time REAL, " + this.keylist.map(kn => kn + " REAL").join(', ') + ")");
+        if (!this.dirty) {
+            await this.runsqlAsync(this.database, "CREATE TABLE " + this.tablename + " (time REAL, " + this.keylist.map(kn => kn + " REAL").join(', ') + ");");
+            this.dirty = true;
+        }
 
         const column_str = "(time," + this.keylist.join(",") + ")";
         const value_str = "(?," + new Array<string>(this.keylist.length).fill('?').join(",") + ")";
         const valuelist: number[] = [time * this.timeunit];
         for (let key of this.keylist) {
-            if (value[key])
+            if (value[key]) {
                 valuelist.push(value[key])
+                this.valuebuffer[key] = value[key];
+            }
             else
-                throw new Error("Key of " + key + " is not exist in datastore.");
+                // Retreve previous value from valuebuffer
+                value[key] = this.valuebuffer[key];
         }
-        await this.runsqlAsync(this.database, "INSERT INTO " + this.tablename + " " + column_str + " VALUES " + value_str, valuelist);
+        await this.runsqlAsync(this.database, "INSERT INTO " + this.tablename + " " + column_str + " VALUES " + value_str + ";", valuelist);
     }
 
     public async close() {

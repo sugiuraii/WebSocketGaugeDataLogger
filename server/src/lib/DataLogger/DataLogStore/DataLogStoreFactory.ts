@@ -24,10 +24,15 @@
 
 import { DataLogStore } from "./DataLogStore";
 import { MemoryDataLogStore } from "./memory/MemoryDataLogStore";
+import { Database } from 'sqlite3';
+import { SQLite3DataLogStore } from "./sqlite3/SQLite3DataLogStore";
 
 export class DataLogStoreFactory
 {
     public static getMemoryDataLogStore(keylist: string[], maxStoreSize : number) : DataLogStore {
         return new MemoryDataLogStore(keylist, maxStoreSize)
     };
+    public static getSQLite3DataLogStore(database: Database, tablename: string, keylist: string[]) {
+        return new SQLite3DataLogStore(database, tablename, keylist);
+    }
 }

@@ -29,6 +29,7 @@ import { DataLoggerService } from "../Service/DataLoggerService";
 import log4js from "log4js";
 import { DataLogStoreFactory } from "../DataLogStore/DataLogStoreFactory";
 import { convertDataLogStoreToCsv } from "../DataLogStore/DataLogStoreUtils";
+import { Database } from "sqlite3";
 
 export class DataLoggerController
 {
@@ -75,7 +76,7 @@ export class DataLoggerController
             runningCommand = command;
             this.logger.info("Logger service is stated. Running command is ...");
             this.logger.info(JSON.stringify(command));
-            store = DataLogStoreFactory.getMemoryDataLogStore(command.ParameterCodeList, command.DataStoreSize);
+            store = DataLogStoreFactory.getSQLite3DataLogStore(new Database(":memory:"), "test1", command.ParameterCodeList);
             try
             {
                 await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);
