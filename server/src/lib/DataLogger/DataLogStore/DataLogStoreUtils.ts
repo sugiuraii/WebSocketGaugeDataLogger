@@ -24,15 +24,16 @@
 
 import { DataLogStore } from "./DataLogStore";
 
-export function convertDataLogStoreToCsv(store : DataLogStore) : string
+export async function convertDataLogStoreToCsv(store : DataLogStore) : Promise<string>
 {
-    const timeArray = store.getSamples().time;
-    const valueArray = store.getSamples().value;
+    const samples = await store.getSamples();
+    const timeArray = samples.time;
+    const valueArray = samples.value;
 
     let outString  = "";
     // Create Header
     outString += "Time,";
-    outString += (Object.keys(store.getSamples().value).join() + '\n');
+    outString += (Object.keys(samples.value).join() + '\n');
 
     const datLength = timeArray.length;
     for(let i = 0; i < datLength; i++)

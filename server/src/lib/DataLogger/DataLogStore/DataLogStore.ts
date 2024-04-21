@@ -24,7 +24,7 @@
 
 export interface DataLogStore
 {
-    getSamples() : {time: number[], value : {[key : string] : number[]}};
+    getSamples() : Promise<{time: number[], value : {[key : string] : number[]}}>;
     pushSample(time : number, value : {[key : string] : number}) : void;
     close() : void;
 }
