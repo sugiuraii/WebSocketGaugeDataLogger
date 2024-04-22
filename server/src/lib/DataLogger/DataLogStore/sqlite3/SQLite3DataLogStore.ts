@@ -43,7 +43,7 @@ export class SQLite3DataLogStore implements DataLogStore {
             this.valuebuffer[key] = 0;
     }
     // Wrapper of sqlite3 api to Promise
-    private async runsqlAsync(db: Database, sql: string, ...params: any[]): Promise<Database> {
+    private async runsqlAsync(db: Database, sql: string, ...params: any): Promise<Database> {
         return new Promise((resolve, reject) => {
             db.run(sql, params, (err) => {
                 if (err) reject(err);
