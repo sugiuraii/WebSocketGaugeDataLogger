@@ -39,7 +39,7 @@ export class SQLite3DataLogStore implements DataLogStore {
         this.keylist = keylist;
         this.valuebuffer = {};
         // Reset value buffer
-        for(let key in keylist)
+        for(let key of keylist)
             this.valuebuffer[key] = 0;
     }
     // Wrapper of sqlite3 api to Promise
@@ -73,32 +73,34 @@ export class SQLite3DataLogStore implements DataLogStore {
             time.push(row["time"]);
             this.keylist.forEach(key => value[key].push(row[key]));
         }
-        return {time, value};
+        return {time : time, value : value};
     }
 
     public async pushSample(time: number, value: { [key: string]: number }): Promise<void> {
         // Create table
         if (!this.dirty) {
-            await this.runsqlAsync(this.database, "CREATE TABLE " + this.tablename + " (time REAL, " + this.keylist.map(kn => kn + " REAL").join(', ') + ");");
+            const sql = "CREATE TABLE " + this.tablename + " (time REAL, " + this.keylist.map(kn => kn + " REAL").join(', ') + ");";
+            await this.runsqlAsync(this.database, sql);
             this.dirty = true;
         }
 
         const column_str = "(time," + this.keylist.join(",") + ")";
         const value_str = "(?," + new Array<string>(this.keylist.length).fill('?').join(",") + ")";
-        const valuelist: number[] = [time * this.timeunit];
+        const valuelist: number[] = [];
+        valuelist.push(time*this.timeunit);
         for (let key of this.keylist) {
-            if (value[key]) {
+            if (value[key] !== undefined) {
                 valuelist.push(value[key])
                 this.valuebuffer[key] = value[key];
             }
             else
                 // Retreve previous value from valuebuffer
-                value[key] = this.valuebuffer[key];
+                valuelist.push(this.valuebuffer[key]);
         }
-        await this.runsqlAsync(this.database, "INSERT INTO " + this.tablename + " " + column_str + " VALUES " + value_str + ";", valuelist);
+        const sql = "INSERT INTO " + this.tablename + " " + column_str + " VALUES " + value_str + ";";
+        await this.runsqlAsync(this.database, sql, ...valuelist);
     }
 
     public async close() {
-        this.database.close();
     }
 }
