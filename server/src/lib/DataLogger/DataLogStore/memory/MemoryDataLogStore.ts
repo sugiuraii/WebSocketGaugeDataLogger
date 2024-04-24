@@ -22,59 +22,30 @@
  * THE SOFTWARE.
  */
 
-export interface DataLogStore
-{
-    readonly Store : {time: number[], value : {[key : string] : number[]}};
-    pushSample(time : number, value : {[key : string] : number}) : void;
-    close() : void;
-}
+import { DataLogStore } from "../DataLogStore";
 
-export function convertDataLogStoreToCsv(store : DataLogStore) : string
-{
-    const timeArray = store.Store.time;
-    const valueArray = store.Store.value;
-
-    let outString  = "";
-    // Create Header
-    outString += "Time,";
-    outString += (Object.keys(store.Store.value).join() + '\n');
-
-    const datLength = timeArray.length;
-    for(let i = 0; i < datLength; i++)
-    {
-        const singleSampleDat : number[] = []; 
-        singleSampleDat.push(timeArray[i]);
-        for(let key of Object.keys(valueArray))
-            singleSampleDat.push(valueArray[key][i]);
-        outString += (singleSampleDat.map(num => num.toString()).join() + '\n');
-    }
-
-    return outString;
-}
-
-export class DataLogStoreFactory
-{
-    public static getMemoryDataLogStore(maxStoreSize : number) : DataLogStore {
-        return new MemoryDataLogStore(maxStoreSize)
-    };
-}
-
-class MemoryDataLogStore implements DataLogStore
+export class MemoryDataLogStore implements DataLogStore
 {
     private readonly timeunit = 0.001; // Time unit is ms.s
 
     private readonly timeArray : number[] = [];
-    private readonly valueArray : {[key : string] : number[]} = {};
+    private readonly valueArray : {[key : string] : number[]};
     private readonly maxStoreSize : number;
-    public get Store() : {time: number[], value : {[key : string] : number[]}} { return {time : this.timeArray, value : this.valueArray} }
+    private readonly keyList: string[];
+    
+    public async getSamples() : Promise<{time: number[], value : {[key : string] : number[]}}> { return {time : this.timeArray, value : this.valueArray} }
     public get MaxStoreSize() : number {return this.maxStoreSize}
     
-    constructor(maxStoreSize : number)
+    constructor(keylist: string[], maxStoreSize : number)
     {
+        this.keyList = keylist;
         this.maxStoreSize = maxStoreSize;
+        this.valueArray = {};
+        for(let key of keylist)
+            this.valueArray[key] = [];   
     }
 
-    public async pushSample(time : number, value : {[key : string] : number})
+    public async pushSample(time : number, value : {[key : string] : number}): Promise<void>
     {
         if(this.timeArray.length >= this.maxStoreSize)
         {
@@ -83,26 +54,17 @@ class MemoryDataLogStore implements DataLogStore
         }
 
         this.timeArray.push(time*this.timeunit);
-
-        if(Object.keys(this.valueArray).length === 0) // Registrate intial sample => Register key.
-        {
-            for(let key of Object.keys(value))
-                this.valueArray[key] = [];   
-        }
-
         for(let key of Object.keys(value))
         {
             if(this.valueArray[key])
                 this.valueArray[key].push(value[key])
             else
-                throw new Error("Key of " + key + " was not registered at first sample.");
+                throw new Error("Key of " + key + " is not exist in datastore.");
         }
     }
 
-    public close()
+    public async close()
     {
         // Do nothing.
     }
 }
-
-

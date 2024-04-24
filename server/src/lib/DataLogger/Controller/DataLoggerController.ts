@@ -22,12 +22,14 @@
  * THE SOFTWARE.
  */
 import { Express } from "express";
-import { convertDataLogStoreToCsv, DataLogStoreFactory } from "../Model/DataLogStore";
 import { RunCommandModel } from "../Model/RunCommandModel";
 import { RunResultModel } from "../Model/RunResultModel";
 import { StateModel } from "../Model/StateModel";
 import { DataLoggerService } from "../Service/DataLoggerService";
 import log4js from "log4js";
+import { DataLogStoreFactory } from "../DataLogStore/DataLogStoreFactory";
+import { convertDataLogStoreToCsv } from "../DataLogStore/DataLogStoreUtils";
+import { Database } from "sqlite3";
 
 export class DataLoggerController
 {
@@ -45,21 +47,22 @@ export class DataLoggerController
         const service = this.service;
         const stopPollingInterval = 10;
         
-        let store = DataLogStoreFactory.getMemoryDataLogStore(1);
+        let store = DataLogStoreFactory.getMemoryDataLogStore(["null"], 1);
         let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, ParameterCodeList : [], WebsocketMessageInterval : 0}
 
-        app.get('/api/store', (req, res) => 
+        app.get('/api/store', async (req, res) => 
         {
-            res.send(JSON.stringify(store.Store));
+            const samples = await store.getSamples();
+            res.send(JSON.stringify(samples));
             this.logger.info("Data store is requested from " + req.headers.host);
         });
 
-        app.get('/api/store/getAsCSV',  (req, res) => 
+        app.get('/api/store/getAsCSV', async (req, res) => 
         {
-            res.send(convertDataLogStoreToCsv(store))
+            await res.send(convertDataLogStoreToCsv(store))
             this.logger.info("Data store is requested by csv format, from " + req.headers.host);
         });
-        app.get('/api/store/codelist', (_, res) => res.send(JSON.stringify(Object.keys(store.Store.value))));
+        app.get('/api/store/codelist', async (_, res) => res.send(JSON.stringify(Object.keys((await store.getSamples()).value))));
         app.get('/api/setting/available_code_list', (_, res) => res.send(service.getAvailableParameterCodeList()));
         app.get('/api/state', (_, res) => 
         {
@@ -73,7 +76,7 @@ export class DataLoggerController
             runningCommand = command;
             this.logger.info("Logger service is stated. Running command is ...");
             this.logger.info(JSON.stringify(command));
-            store = DataLogStoreFactory.getMemoryDataLogStore(command.DataStoreSize);
+            store = DataLogStoreFactory.getSQLite3DataLogStore(new Database(":memory:"), "test1", command.ParameterCodeList);
             try
             {
                 await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);
