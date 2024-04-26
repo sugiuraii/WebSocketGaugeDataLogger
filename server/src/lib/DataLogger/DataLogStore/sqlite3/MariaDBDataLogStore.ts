@@ -24,19 +24,27 @@
 
 import { DataLogStore } from "../DataLogStore";
 import { Pool } from 'mariadb';
+import { DataLogStoreWriteCache} from "../writecache/DataLogStoreWriteCahce";
 
 export class MariaDBDataLogStore implements DataLogStore {
     private readonly timeunit = 0.001; // Time unit is ms.s
     private readonly connectionPool: Pool;
     private readonly tablename: string;
     private readonly keylist: string[];
+    private readonly batchBuffer: DataLogStoreWriteCache;
     private dirty = false;
     // Value buffer to store previous value
     private readonly valuebuffer: { [key: string]: number };
-    constructor(connectionPool: Pool, tablename: string, keylist: string[]) {
+    constructor(connectionPool: Pool, tablename: string, keylist: string[], batchBufferSize: number) {
         this.connectionPool = connectionPool;
         this.tablename = tablename;
         this.keylist = keylist;
+        this.batchBuffer = new DataLogStoreWriteCache(async vals => {
+            const column_str = "(time," + this.keylist.join(",") + ")";
+            const value_str = "(?," + new Array<string>(this.keylist.length).fill('?').join(",") + ")";
+            const sql = "INSERT INTO " + this.tablename + " " + column_str + " VALUES " + value_str + ";";
+            this.connectionPool.batch(sql, vals);
+        }, batchBufferSize)
         this.valuebuffer = {};
         // Reset value buffer
         for(let key of keylist)
@@ -66,8 +74,6 @@ export class MariaDBDataLogStore implements DataLogStore {
             this.dirty = true;
         }
 
-        const column_str = "(time," + this.keylist.join(",") + ")";
-        const value_str = "(?," + new Array<string>(this.keylist.length).fill('?').join(",") + ")";
         const valuelist: number[] = [];
         valuelist.push(time*this.timeunit);
         for (let key of this.keylist) {
@@ -79,10 +85,10 @@ export class MariaDBDataLogStore implements DataLogStore {
                 // Retreve previous value from valuebuffer
                 valuelist.push(this.valuebuffer[key]);
         }
-        const sql = "INSERT INTO " + this.tablename + " " + column_str + " VALUES " + value_str + ";";
-        await this.connectionPool.query(sql, valuelist);
+        await this.batchBuffer.write(valuelist);
     }
 
     public async close() {
+        await this.batchBuffer.flush();
     }
 }
