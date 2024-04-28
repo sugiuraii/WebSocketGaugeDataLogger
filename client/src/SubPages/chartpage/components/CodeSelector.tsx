@@ -37,7 +37,6 @@ export const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
     const [selectedCode, setSelectedCode] = useState<WebsocketParameterCode>();
     const [leftAxisCodeList, setLeftAxisCodeList] = useState<WebsocketParameterCode[]>([]);
     const [rightAxisCodeList, setRightAxisCodeList] = useState<WebsocketParameterCode[]>([]);
-    const [isTimeAxisElapsed, setTimeAxisElapsed] = useState<boolean>(false);
 
     const codeListItems = p.codeToSelect.map(c => <option key={c}>{c}</option>);
     codeListItems.unshift(<option key={"---"}>---</option>);
@@ -79,17 +78,6 @@ export const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
 
     return (
         <>
-            <Card>
-                <Card.Header>Time axis settings</Card.Header>
-                <Card.Body>
-                    <Form.Check
-                        type='switch'
-                        id={`timeAxisElapsedSwitch`}
-                        label={`Set time Axis to elapsed time from start.`}
-                        onChange={ e => setTimeAxisElapsed(!isTimeAxisElapsed)}
-                        />
-                </Card.Body>
-            </Card>
             <Card>
                 <Card.Header>Plot data select</Card.Header>
                 <Card>

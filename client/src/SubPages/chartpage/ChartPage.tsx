@@ -25,7 +25,7 @@
 import { useState, FunctionComponent, useEffect } from "react";
 import * as Echarts from 'echarts'
 import React from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { Card, Col, Container, Form, Row } from "react-bootstrap";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 import { ChartPanel } from "./components/ChartPanel";
 import { CodeSelector } from "./components/CodeSelector"
@@ -33,6 +33,7 @@ import { CodeSelector } from "./components/CodeSelector"
 export const ChartPage: FunctionComponent = () => {
     const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
     const [codeToSelect, setCodeToSelect] = useState<WebsocketParameterCode[]>([]);
+    const [isTimeAxisElapsed, setTimeAxisElapsed] = useState<boolean>(false);
 
     useEffect(() => {
         let cleanedUp = false;
@@ -47,6 +48,8 @@ export const ChartPage: FunctionComponent = () => {
     const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
         const res = await fetch("/api/store");
         const dataStore: { time: number[], value: { [key: string]: number[] } } = await res.json();
+        const startTime = dataStore.time[0];
+        const elapsedTimeStore = dataStore.time.map(v => (v - startTime)/1000); // Convert to sec unit.
 
         const yAxisOption: Echarts.EChartOption.YAxis[] = [];
         const seriesOption: Echarts.EChartOption.Series[] = [];
@@ -85,16 +88,26 @@ export const ChartPage: FunctionComponent = () => {
                     saveAsImage: { show: true }
                 }
             },
-            xAxis: {
+            xAxis: isTimeAxisElapsed?
+            {
                 type: 'category',
-                data: dataStore.time,
+                data: elapsedTimeStore,
                 name: 'time(sec)',
                 nameLocation: 'center',
                 nameGap: 30,
                 axisLabel: {
-                    formatter: (x: number) => Math.floor(x * 10) / 10
+                    formatter: (x: number) => Math.floor(x * 100) / 100
                 }
-
+            }:
+            {
+                type: 'time',
+                data: dataStore.time,
+                name: 'time',
+                nameLocation: 'center',
+                nameGap: 30,
+                axisLabel: {
+                    formatter: (x: number) => new Date(x).toLocaleTimeString()
+                }
             },
             yAxis: yAxisOption,
             dataZoom: [
@@ -138,6 +151,17 @@ export const ChartPage: FunctionComponent = () => {
             <Container fluid>
                 <Row>
                     <Col sm={4}>
+                        <Card>
+                            <Card.Header>Time axis settings</Card.Header>
+                            <Card.Body>
+                                <Form.Check
+                                    type='switch'
+                                    id={`timeAxisElapsedSwitch`}
+                                    label={`Set time Axis to elapsed time from start.`}
+                                    onChange={e => setTimeAxisElapsed(!isTimeAxisElapsed)}
+                                />
+                            </Card.Body>
+                        </Card>
                         <CodeSelector codeToSelect={codeToSelect} onSet={(leftAxisCodeList, rightAxisCodeList) => handleAddChart(leftAxisCodeList, rightAxisCodeList)} />
                     </Col>
                     <Col sm={8}>
