@@ -82,18 +82,18 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
     return (
         <>
             <Card>
+                <Card.Header>Time axis settings</Card.Header>
+                <Card.Body>
+                    <Form.Check
+                        type='switch'
+                        id={`timeAxisElapsedSwitch`}
+                        label={`Set time Axis to elapsed time from start.`}
+                        onChange={ e => setTimeAxisElapsed(!isTimeAxisElapsed)}
+                        />
+                </Card.Body>
+            </Card>
+            <Card>
                 <Card.Header>Plot data select</Card.Header>
-                <Card>
-                    <Card.Header>Code select</Card.Header>
-                    <Card.Body>
-                        <Form.Check
-                            type='switch'
-                            id={`timeAxisElapsedSwitch`}
-                            label={`Set time Axis to elapsed time from start.`}
-                            onChange={ e => setTimeAxisElapsed(!isTimeAxisElapsed)}
-                            />
-                    </Card.Body>
-                 </Card>
                 <Card>
                     <Card.Header>Code select</Card.Header>
                     <Card.Body>
