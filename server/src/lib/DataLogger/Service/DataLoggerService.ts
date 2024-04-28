@@ -63,10 +63,9 @@ export class DataLoggerService
         parameterCodeList.forEach(code => wsc.WSMapper.registerParameterCode(code as WebsocketParameterCode, ReadModeCode.SLOWandFAST));
         this.cancellationToken = CancellationTokenFactory.get();
         wsc.Run();
-        const startTime = performance.now();
         while(!this.cancellationToken.IsCancellationRequested)
         {
-            const time = performance.now() - startTime;
+            const time = performance.now() + performance.timeOrigin;
             const value : {[key : string] : number}  =  {};
             parameterCodeList.forEach(code => value[code] = wsc.WSMapper.getValue(code as WebsocketParameterCode));
             await store.pushSample(time, value);
