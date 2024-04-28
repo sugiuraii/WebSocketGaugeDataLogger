@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-import { useState, VoidFunctionComponent, FunctionComponent, useEffect } from "react";
+import { useState, FunctionComponent, useEffect } from "react";
 import * as Echarts from 'echarts'
 import React from "react";
 import { Button, Card, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
@@ -114,7 +114,7 @@ const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
     )
 }
 
-export const ChartPage: VoidFunctionComponent = () => {
+export const ChartPage: FunctionComponent = () => {
     const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
     const [codeToSelect, setCodeToSelect] = useState<WebsocketParameterCode[]>([]);
 
