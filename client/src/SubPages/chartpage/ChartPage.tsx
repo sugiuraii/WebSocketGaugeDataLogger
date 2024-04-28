@@ -46,6 +46,11 @@ export const ChartPage: FunctionComponent = () => {
     }, []);
 
     const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
+        if(leftAxisCodeList.length == 0 && rightAxisCodeList.length == 0) {
+            alert("Set parameter code for left or right axis.");
+            return;
+        }
+        
         const res = await fetch("/api/store");
         const dataStore: { time: number[], value: { [key: string]: number[] } } = await res.json();
         const startTime = dataStore.time[0];
