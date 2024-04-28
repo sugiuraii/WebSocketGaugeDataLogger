@@ -50,6 +50,14 @@ export const ChartPage: FunctionComponent = () => {
         const dataStore: { time: number[], value: { [key: string]: number[] } } = await res.json();
         const startTime = dataStore.time[0];
         const elapsedTimeStore = dataStore.time.map(v => (v - startTime)/1000); // Convert to sec unit.
+        const timeStringStore = dataStore.time.map(v => {
+            const date = new Date(v);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const mins = date.getMinutes().toString().padStart(2, '0');
+            const secs = date.getSeconds().toString().padStart(2, '0');
+            const millisecs = date.getMilliseconds().toString().padStart(3, '0');
+            return hours + ":"+ mins + ":"+ secs + "." + millisecs;
+        });
 
         const yAxisOption: Echarts.EChartOption.YAxis[] = [];
         const seriesOption: Echarts.EChartOption.Series[] = [];
@@ -96,18 +104,15 @@ export const ChartPage: FunctionComponent = () => {
                 nameLocation: 'center',
                 nameGap: 30,
                 axisLabel: {
-                    formatter: (x: number) => Math.floor(x * 100) / 100
+                    formatter: (x: number) => Math.floor(x * 10) / 10
                 }
             }:
             {
-                type: 'time',
-                data: dataStore.time,
+                type: 'category',
+                data: timeStringStore,
                 name: 'time',
                 nameLocation: 'center',
-                nameGap: 30,
-                axisLabel: {
-                    formatter: (x: number) => new Date(x).toLocaleTimeString()
-                }
+                nameGap: 30
             },
             yAxis: yAxisOption,
             dataZoom: [
