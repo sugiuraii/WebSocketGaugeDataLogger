@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Container, Nav, Navbar } from 'react-bootstrap';
-import { ControlPage } from 'SubPages/ControlPage';
-import { ChartPage } from 'SubPages/ChartPage';
+import { ControlPage } from 'SubPages/controlpage/ControlPage';
+import { ChartPage } from 'SubPages/chartpage/ChartPage';
 
 const run = async () => {
     const container = document.getElementById('contents');
