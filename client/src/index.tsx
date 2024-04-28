@@ -1,7 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import * as Echarts from 'echarts'
-import ReactEcharts from 'echarts-for-react'
+import { createRoot } from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Container, Nav, Navbar } from 'react-bootstrap';
@@ -15,8 +13,8 @@ const run = async () => {
     const appState = await(await fetch("/api/state")).json();
     const chartElem = <ChartPage />; 
     const controlElem = <ControlPage initialState={appState} parameterCodeListToSelect={parameterCodeListToSelect}/>;
-
-    ReactDOM.render
+    const root = createRoot(container!); 
+    root.render
         (
             <>
             <HashRouter>
@@ -39,7 +37,7 @@ const run = async () => {
                 </Routes>
             </HashRouter>                
             </>
-            , container);
+        );
 };
 
 (async function main() {
