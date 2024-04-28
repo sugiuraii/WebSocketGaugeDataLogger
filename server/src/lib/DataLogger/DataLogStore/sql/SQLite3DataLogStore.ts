@@ -26,7 +26,6 @@ import { DataLogStore } from "../DataLogStore";
 import { Database, Statement } from 'sqlite3';
 
 export class SQLite3DataLogStore implements DataLogStore {
-    private readonly timeunit = 0.001; // Time unit is ms.s
     private readonly database: Database;
     private readonly tablename: string;
     private readonly keylist: string[];
@@ -87,7 +86,7 @@ export class SQLite3DataLogStore implements DataLogStore {
         const column_str = "(time," + this.keylist.join(",") + ")";
         const value_str = "(?," + new Array<string>(this.keylist.length).fill('?').join(",") + ")";
         const valuelist: number[] = [];
-        valuelist.push(time*this.timeunit);
+        valuelist.push(time);
         for (let key of this.keylist) {
             if (value[key] !== undefined) {
                 valuelist.push(value[key])

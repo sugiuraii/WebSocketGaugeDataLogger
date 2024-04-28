@@ -27,7 +27,6 @@ import { Pool } from 'mariadb';
 import { DataLogStoreWriteCache} from "../writecache/DataLogStoreWriteCahce";
 
 export class MariaDBDataLogStore implements DataLogStore {
-    private readonly timeunit = 0.001; // Time unit is ms.s
     private readonly connectionPool: Pool;
     private readonly tablename: string;
     private readonly keylist: string[];
@@ -75,7 +74,7 @@ export class MariaDBDataLogStore implements DataLogStore {
         }
 
         const valuelist: number[] = [];
-        valuelist.push(time*this.timeunit);
+        valuelist.push(time);
         for (let key of this.keylist) {
             if (value[key] !== undefined) {
                 valuelist.push(value[key])

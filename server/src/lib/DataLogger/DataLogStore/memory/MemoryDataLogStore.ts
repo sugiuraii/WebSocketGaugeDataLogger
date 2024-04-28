@@ -26,8 +26,6 @@ import { DataLogStore } from "../DataLogStore";
 
 export class MemoryDataLogStore implements DataLogStore
 {
-    private readonly timeunit = 0.001; // Time unit is ms.s
-
     private readonly timeArray : number[] = [];
     private readonly valueArray : {[key : string] : number[]};
     private readonly maxStoreSize : number;
@@ -53,7 +51,7 @@ export class MemoryDataLogStore implements DataLogStore
             Object.keys(this.valueArray).forEach(key => this.valueArray[key].shift());   
         }
 
-        this.timeArray.push(time*this.timeunit);
+        this.timeArray.push(time);
         for(let key of Object.keys(value))
         {
             if(this.valueArray[key])
