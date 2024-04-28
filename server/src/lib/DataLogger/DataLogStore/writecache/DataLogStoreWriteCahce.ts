@@ -22,22 +22,24 @@
  * THE SOFTWARE.
  */
 
-import { DataLogStore } from "./DataLogStore";
-import { MemoryDataLogStore } from "./memory/MemoryDataLogStore";
-import { Database } from 'sqlite3';
-import { Pool } from 'mariadb';
-import { SQLite3DataLogStore } from "./sqlite3/SQLite3DataLogStore";
-import { MariaDBDataLogStore } from "./sqlite3/MariaDBDataLogStore";
-
-export class DataLogStoreFactory
-{
-    public static getMemoryDataLogStore(keylist: string[], maxStoreSize : number) : DataLogStore {
-        return new MemoryDataLogStore(keylist, maxStoreSize)
-    };
-    public static getSQLite3DataLogStore(database: Database, tablename: string, keylist: string[]) {
-        return new SQLite3DataLogStore(database, tablename, keylist);
+export class DataLogStoreWriteCache {
+    private Data : any[][];
+    private DataCountToBatchWrite: number;
+    private BatchWriteFunction: (vals: any[][]) => Promise<void>;
+    constructor(batchWriteFunction: (vals: any[]) => Promise<void>, dataCountToBatchWrite: number) {
+        this.BatchWriteFunction = batchWriteFunction;
+        this.DataCountToBatchWrite = dataCountToBatchWrite;
+        this.Data = [];
     }
-    public static getMariaDBDataLogStore(connectionPool: Pool, tablename: string, keylist: string[], batchBufferSize: number) {
-        return new MariaDBDataLogStore(connectionPool, tablename, keylist, batchBufferSize);
+    
+    public async write(val : any[]) : Promise<void> {
+        this.Data.push(val);
+        if(this.Data.length >= this.DataCountToBatchWrite)
+            await this.flush();
+    }
+
+    public async flush() : Promise<void> {
+        await this.BatchWriteFunction(this.Data);
+        this.Data = [];
     }
 }
