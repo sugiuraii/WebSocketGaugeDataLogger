@@ -26,8 +26,8 @@ import { DataLogStore } from "./DataLogStore";
 import { MemoryDataLogStore } from "./memory/MemoryDataLogStore";
 import { Database } from 'sqlite3';
 import { Pool } from 'mariadb';
-import { SQLite3DataLogStore } from "./sqlite3/SQLite3DataLogStore";
-import { MariaDBDataLogStore } from "./sqlite3/MariaDBDataLogStore";
+import { SQLite3DataLogStore } from "./sql/SQLite3DataLogStore";
+import { MariaDBDataLogStore } from "./sql/MariaDBDataLogStore";
 
 export class DataLogStoreFactory
 {
