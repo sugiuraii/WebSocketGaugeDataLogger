@@ -49,15 +49,8 @@ export const ChartPage: FunctionComponent = () => {
         const res = await fetch("/api/store");
         const dataStore: { time: number[], value: { [key: string]: number[] } } = await res.json();
         const startTime = dataStore.time[0];
-        const elapsedTimeStore = dataStore.time.map(v => (v - startTime)/1000); // Convert to sec unit.
-        const timeStringStore = dataStore.time.map(v => {
-            const date = new Date(v);
-            const hours = date.getHours().toString().padStart(2, '0');
-            const mins = date.getMinutes().toString().padStart(2, '0');
-            const secs = date.getSeconds().toString().padStart(2, '0');
-            const millisecs = date.getMilliseconds().toString().padStart(3, '0');
-            return hours + ":"+ mins + ":"+ secs + "." + millisecs;
-        });
+        const valueTimeStore = new Map(Object.keys(dataStore.value).map(k => [k, dataStore.value[k].map((v, i)  => [new Date(dataStore.time[i]).toISOString(), v])]));
+        const valueElapsedSecStore = new Map(Object.keys(dataStore.value).map(k => [k, dataStore.value[k].map((v, i)  => [(dataStore.time[i] - startTime)/1000, v])]));
 
         const yAxisOption: Echarts.EChartOption.YAxis[] = [];
         const seriesOption: Echarts.EChartOption.Series[] = [];
@@ -66,14 +59,14 @@ export const ChartPage: FunctionComponent = () => {
         let leftAxisIndex = 0;
         for (let code of leftAxisCodeList) {
             yAxisOption.push({ type: 'value', name: code, nameLocation: 'center', nameGap: 40, position: 'left', offset: leftAxisIndex * 80, axisLine: { show: true } });
-            seriesOption.push({ name: code, data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
+            seriesOption.push({ name: code, data: isTimeAxisElapsed?valueElapsedSecStore.get(code):valueTimeStore.get(code), type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
             leftAxisIndex++;
         }
         let rightAxisIndex = 0;
         for (let code of rightAxisCodeList) {
             yAxisOption.push({ type: 'value', name: code, nameLocation: 'center', nameGap: 40, position: 'right', offset: rightAxisIndex * 80, axisLine: { show: true } });
-            seriesOption.push({ name: code, data: dataStore.value[code], type: 'line', yAxisIndex: axisIndex });
+            seriesOption.push({ name: code, data: isTimeAxisElapsed?valueElapsedSecStore.get(code):valueTimeStore.get(code), type: 'line', yAxisIndex: axisIndex });
             axisIndex++;
             rightAxisIndex++;
         }
@@ -98,19 +91,14 @@ export const ChartPage: FunctionComponent = () => {
             },
             xAxis: isTimeAxisElapsed?
             {
-                type: 'category',
-                data: elapsedTimeStore,
-                name: 'time(sec)',
+                type: 'value',
+                name: 'elapsed time(sec)',
                 nameLocation: 'center',
-                nameGap: 30,
-                axisLabel: {
-                    formatter: (x: number) => Math.floor(x * 10) / 10
-                }
+                nameGap: 30
             }:
             {
-                type: 'category',
-                data: timeStringStore,
-                name: 'time',
+                type: 'time',
+                name: 'time stamp',
                 nameLocation: 'center',
                 nameGap: 30
             },
