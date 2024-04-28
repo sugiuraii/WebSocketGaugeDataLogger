@@ -25,106 +25,10 @@
 import { useState, FunctionComponent, useEffect } from "react";
 import * as Echarts from 'echarts'
 import React from "react";
-import { Button, Card, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 import { ChartPanel } from "./components/ChartPanel";
-
-type CodeSelectorProps =
-    {
-        codeToSelect: WebsocketParameterCode[],
-        onSet: (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => void
-    }
-
-const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
-    const [selectedCode, setSelectedCode] = useState<WebsocketParameterCode>();
-    const [leftAxisCodeList, setLeftAxisCodeList] = useState<WebsocketParameterCode[]>([]);
-    const [rightAxisCodeList, setRightAxisCodeList] = useState<WebsocketParameterCode[]>([]);
-    const [isTimeAxisElapsed, setTimeAxisElapsed] = useState<boolean>(false);
-
-    const codeListItems = p.codeToSelect.map(c => <option key={c}>{c}</option>);
-    codeListItems.unshift(<option key={"---"}>---</option>);
-    const leftAxisCodeListItems = leftAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
-    const rightAxisCodeListItems = rightAxisCodeList.map(i => <ListGroup.Item key={i}>{i}</ListGroup.Item>);
-
-    const handleAddLeft = () => {
-        if (selectedCode === undefined)
-            return;
-        const newEnabledCode = [...leftAxisCodeList];  // Need to re-create array to update DOM.
-        if (!newEnabledCode.includes(selectedCode))
-            newEnabledCode.push(selectedCode);
-        setLeftAxisCodeList(newEnabledCode);
-    };
-
-    const handleAddRight = () => {
-        if (selectedCode === undefined)
-            return;
-        const newEnabledCode = [...rightAxisCodeList];  // Need to re-create array to update DOM.
-        if (!newEnabledCode.includes(selectedCode))
-            newEnabledCode.push(selectedCode);
-        setRightAxisCodeList(newEnabledCode);
-    };
-
-    const handleRemoveLeft = () => {
-        const newEnabledCode = [...leftAxisCodeList].filter(c => c !== selectedCode);
-        setLeftAxisCodeList(newEnabledCode);
-    };
-
-    const handleRemoveRight = () => {
-        const newEnabledCode = [...rightAxisCodeList].filter(c => c !== selectedCode);
-        setRightAxisCodeList(newEnabledCode);
-    };
-
-    const handleReset = () => {
-        setLeftAxisCodeList([]);
-        setRightAxisCodeList([]);
-    }
-
-    return (
-        <>
-            <Card>
-                <Card.Header>Time axis settings</Card.Header>
-                <Card.Body>
-                    <Form.Check
-                        type='switch'
-                        id={`timeAxisElapsedSwitch`}
-                        label={`Set time Axis to elapsed time from start.`}
-                        onChange={ e => setTimeAxisElapsed(!isTimeAxisElapsed)}
-                        />
-                </Card.Body>
-            </Card>
-            <Card>
-                <Card.Header>Plot data select</Card.Header>
-                <Card>
-                    <Card.Header>Code select</Card.Header>
-                    <Card.Body>
-                        <Form.Control as="select" value={selectedCode} onChange={e => {
-                            if (e.target.value !== "---")
-                                setSelectedCode(e.target.value as WebsocketParameterCode);
-                        }}>
-                            {codeListItems}
-                        </Form.Control>
-                        <Button variant="primary" onClick={handleAddLeft}>Add to left axis</Button>
-                        <Button variant="secondary" onClick={handleRemoveLeft}>Remove from left axis</Button>
-                        <Button variant="primary" onClick={handleAddRight}>Add to right axis</Button>
-                        <Button variant="secondary" onClick={handleRemoveRight}>Remove from left axis</Button>
-                        <Button variant="danger" onClick={handleReset}>Reset</Button>
-                    </Card.Body>
-                </Card>
-                <Card>
-                    <Card>
-                        <Card.Header>Left axis</Card.Header>
-                        <Card.Body><ListGroup>{leftAxisCodeListItems}</ListGroup></Card.Body>
-                    </Card>
-                    <Card>
-                        <Card.Header>Right axis</Card.Header>
-                        <Card.Body><ListGroup>{rightAxisCodeListItems}</ListGroup></Card.Body>
-                    </Card>
-                </Card>
-                <Button variant="primary" onClick={() => p.onSet(leftAxisCodeList, rightAxisCodeList)}>Add chart</Button>
-            </Card>
-        </>
-    )
-}
+import { CodeSelector } from "./components/CodeSelector"
 
 export const ChartPage: FunctionComponent = () => {
     const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
