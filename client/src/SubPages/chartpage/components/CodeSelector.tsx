@@ -89,11 +89,17 @@ export const CodeSelector: FunctionComponent<CodeSelectorProps> = (p) => {
                         }}>
                             {codeListItems}
                         </Form.Control>
-                        <Button variant="primary" onClick={handleAddLeft}>Add to left axis</Button>
-                        <Button variant="secondary" onClick={handleRemoveLeft}>Remove from left axis</Button>
-                        <Button variant="primary" onClick={handleAddRight}>Add to right axis</Button>
-                        <Button variant="secondary" onClick={handleRemoveRight}>Remove from left axis</Button>
-                        <Button variant="danger" onClick={handleReset}>Reset</Button>
+                        <div>
+                            <Button variant="primary" onClick={handleAddLeft}>Add to left axis</Button>
+                            <Button variant="secondary" onClick={handleRemoveLeft}>Remove from left axis</Button>
+                        </div>
+                        <div>
+                            <Button variant="primary" onClick={handleAddRight}>Add to right axis</Button>
+                            <Button variant="secondary" onClick={handleRemoveRight}>Remove from left axis</Button>
+                        </div>
+                        <div>
+                            <Button variant="danger" onClick={handleReset}>Reset</Button>
+                        </div>
                     </Card.Body>
                 </Card>
                 <Card>
