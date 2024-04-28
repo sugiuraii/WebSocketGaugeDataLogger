@@ -150,7 +150,7 @@ export const ChartPage: FunctionComponent = () => {
                                 <Form.Check
                                     type='switch'
                                     id={`timeAxisElapsedSwitch`}
-                                    label={`Set time Axis to elapsed time from start.`}
+                                    label={isTimeAxisElapsed?`Elapsed time(sec)`:`Epoch Unix Timestamp`}
                                     onChange={e => setTimeAxisElapsed(!isTimeAxisElapsed)}
                                 />
                             </Card.Body>
