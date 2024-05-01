@@ -27,17 +27,19 @@ import { MemoryDataLogStore } from "./memory/MemoryDataLogStore";
 import { Database } from 'sqlite3';
 import { Pool } from 'mariadb';
 import { SQLite3DataLogStore } from "./sql/SQLite3DataLogStore";
-import { MariaDBDataLogStore } from "./sql/MariaDBDataLogStore";
+// /import { MariaDBDataLogStore } from "./sql/MariaDBDataLogStore";
 
 export class DataLogStoreFactory
 {
     public static getMemoryDataLogStore(keylist: string[], maxStoreSize : number) : DataLogStore {
-        return new MemoryDataLogStore(keylist, maxStoreSize)
+        return new MemoryDataLogStore(maxStoreSize)
     };
-    public static getSQLite3DataLogStore(database: Database, tablename: string, keylist: string[]) {
-        return new SQLite3DataLogStore(database, tablename, keylist);
+    public static getSQLite3DataLogStore(database: Database) {
+        return new SQLite3DataLogStore(database);
     }
+    /*
     public static getMariaDBDataLogStore(connectionPool: Pool, tablename: string, keylist: string[], batchBufferSize: number) {
         return new MariaDBDataLogStore(connectionPool, tablename, keylist, batchBufferSize);
     }
+    */
 }

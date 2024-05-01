@@ -21,73 +21,86 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
+/*
 import { DataLogStore } from "../DataLogStore";
 import { Pool } from 'mariadb';
 import { DataLogStoreWriteCache} from "../writecache/DataLogStoreWriteCahce";
 
 export class MariaDBDataLogStore implements DataLogStore {
     private readonly connectionPool: Pool;
-    private readonly tablename: string;
-    private readonly keylist: string[];
-    private readonly batchBuffer: DataLogStoreWriteCache;
-    private dirty = false;
-    // Value buffer to store previous value
-    private readonly valuebuffer: { [key: string]: number };
-    constructor(connectionPool: Pool, tablename: string, keylist: string[], batchBufferSize: number) {
+    private activeTableName: string|undefined = undefined;
+    private readonly batchBuffer: DataLogStoreWriteCache | undefined = undefined;
+    constructor(connectionPool: Pool, batchBufferSize: number) {
         this.connectionPool = connectionPool;
-        this.tablename = tablename;
-        this.keylist = keylist;
+    }
+
+    public async getTableList(): Promise<string[]> {
+        const tables = await this.connectionPool.query("SHOW TABLES;");
+        return tables;
+    }
+
+    public async createTable(tableName: string, keyNameList: string[]): Promise<void> {
+        const sql = "CREATE TABLE " + tableName + " (time REAL, " + keyNameList.map(kn => kn + " REAL").join(', ') + ");";
+        await this.connectionPool.query(sql);
+
         this.batchBuffer = new DataLogStoreWriteCache(async vals => {
             const column_str = "(time," + this.keylist.join(",") + ")";
             const value_str = "(?," + new Array<string>(this.keylist.length).fill('?').join(",") + ")";
             const sql = "INSERT INTO " + this.tablename + " " + column_str + " VALUES " + value_str + ";";
             this.connectionPool.batch(sql, vals);
         }, batchBufferSize)
-        this.valuebuffer = {};
-        // Reset value buffer
-        for(let key of keylist)
-            this.valuebuffer[key] = 0;
+    }
+
+    public setActiveTable(tableName: string): void {
+        if(this.batchBuffer !== undefined)
+            this.flushBuffer();
+        this.activeTableName = tableName;
+    }
+
+    public async flushBuffer(): Promise<void> {
+        if(this.batchBuffer === undefined)
+            throw Error("Batch buffer is undefined. Cannot flush.");
+        await this.batchBuffer.flush();
+    }
+
+    public async dropTable(tableName: string): Promise<void> {
+        await this.connectionPool.query("DROP TABLE " + tableName + ";");
     }
 
     public async getSamples(): Promise<{ time: number[], value: { [key: string]: number[] } }> {
-        const query = "SELECT time, " + this.keylist.join(', ') + " FROM " + this.tablename + ";";
+        const query = "SELECT * FROM " + this.activeTableName + ";";
         const rows = await this.connectionPool.query(query);
         const time: number[] = [];
         const value: { [key: string]: number[] } = {};
-        for(let key of this.keylist)
-            value[key] = [];
 
         for (let row of rows) {
-            time.push(row["time"]);
-            this.keylist.forEach(key => value[key].push(row[key]));
+            Object.keys(row).forEach(key => {
+                if(key === "time")
+                    time.push(row[key]);
+                else {
+                    if(!(key in value))
+                        value[key] = [];
+                    value[key].push(row[key]);
+                }
+            });
         }
         return {time : time, value : value};
     }
 
     public async pushSample(time: number, value: { [key: string]: number }): Promise<void> {
-        // Create table
-        if (!this.dirty) {
-            const sql = "CREATE TABLE " + this.tablename + " (time REAL, " + this.keylist.map(kn => kn + " REAL").join(', ') + ");";
-            await this.connectionPool.query(sql);
-            this.dirty = true;
-        }
-
+        const key_list = Object.keys(value);
+        const column_str = "(time," + key_list.join(",") + ")";
+        const value_str = "(?," + new Array<string>(key_list.length).fill('?').join(",") + ")";
         const valuelist: number[] = [];
         valuelist.push(time);
-        for (let key of this.keylist) {
-            if (value[key] !== undefined) {
-                valuelist.push(value[key])
-                this.valuebuffer[key] = value[key];
-            }
-            else
-                // Retreve previous value from valuebuffer
-                valuelist.push(this.valuebuffer[key]);
+        for (let key of key_list) {
+            valuelist.push(value[key])
         }
+        const sql = "INSERT INTO " + this.activeTableName + " " + column_str + " VALUES " + value_str + ";";
+        if(this.batchBuffer === undefined)
+            throw Error("Batch buffer is undefined. Cannot push values.");
         await this.batchBuffer.write(valuelist);
     }
 
-    public async close() {
-        await this.batchBuffer.flush();
-    }
 }
+*/

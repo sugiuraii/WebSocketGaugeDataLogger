@@ -24,9 +24,9 @@
 
 import { DataLogStore } from "./DataLogStore";
 
-export async function convertDataLogStoreToCsv(store : DataLogStore) : Promise<string>
+export async function convertDataLogStoreToCsv(store : DataLogStore, tableName : string) : Promise<string>
 {
-    const samples = await store.getSamples();
+    const samples = await store.getSamples(tableName);
     const timeArray = samples.time;
     const valueArray = samples.value;
 

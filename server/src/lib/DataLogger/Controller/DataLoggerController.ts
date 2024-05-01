@@ -32,6 +32,8 @@ import { convertDataLogStoreToCsv } from "../DataLogStore/DataLogStoreUtils";
 import { Database } from "sqlite3";
 import * as mariadb from "mariadb";
 
+const tablename = "testtable1";
+
 export class DataLoggerController
 {
     private logger = log4js.getLogger();
@@ -53,17 +55,17 @@ export class DataLoggerController
 
         app.get('/api/store', async (req, res) => 
         {
-            const samples = await store.getSamples();
+            const samples = await store.getSamples(tablename);
             res.send(JSON.stringify(samples));
             this.logger.info("Data store is requested from " + req.headers.host);
         });
 
         app.get('/api/store/getAsCSV', async (req, res) => 
         {
-            await res.send(convertDataLogStoreToCsv(store))
+            await res.send(convertDataLogStoreToCsv(store, tablename))
             this.logger.info("Data store is requested by csv format, from " + req.headers.host);
         });
-        app.get('/api/store/codelist', async (_, res) => res.send(JSON.stringify(Object.keys((await store.getSamples()).value))));
+        app.get('/api/store/codelist', async (_, res) => res.send(JSON.stringify(Object.keys((await store.getSamples(tablename)).value))));
         app.get('/api/setting/available_code_list', (_, res) => res.send(service.getAvailableParameterCodeList()));
         app.get('/api/state', (_, res) => 
         {
@@ -80,6 +82,8 @@ export class DataLoggerController
             store = DataLogStoreFactory.getMemoryDataLogStore(command.ParameterCodeList, command.DataStoreSize);
             //store = DataLogStoreFactory.getSQLite3DataLogStore(new Database(":memory:"), "test1", command.ParameterCodeList);
             //store = DataLogStoreFactory.getMariaDBDataLogStore(mariadb.createPool({host: '0.0.0.0', user: 'test', password: 'test', database: 'test1', connectionLimit: 5}), "testtable1", command.ParameterCodeList, 20);
+            await store.createTable(tablename, command.ParameterCodeList);
+            store.setActiveTable(tablename);
             try
             {
                 await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);

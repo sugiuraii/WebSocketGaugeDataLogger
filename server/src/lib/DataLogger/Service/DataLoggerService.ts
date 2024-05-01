@@ -71,7 +71,7 @@ export class DataLoggerService
             await store.pushSample(time, value);
             await new Promise(resolve => setTimeout(resolve, dataStoreInterval));
         }
-        store.close();
+        store.flushBuffer();
         wsc.Stop();
         this.cancellationToken = undefined;
     }   

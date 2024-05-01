@@ -38,7 +38,9 @@ export class MemoryDataLogStore implements DataLogStore
         return [...this.dataTables.keys()];
     }
     public async createTable(tableName: string, keyNameList: string[]): Promise<void> {
-        this.dataTables.set(tableName, {time:[], value:{}});
+        const value : {[key : string] : number[]} = {};
+        keyNameList.forEach(key => value[key] = []);
+        this.dataTables.set(tableName, {time:[], value:value});
     }
     public setActiveTable(tableName: string): void {
         this.activeTableName = tableName;
@@ -79,10 +81,5 @@ export class MemoryDataLogStore implements DataLogStore
             else
                 throw new Error("Key of " + key + " is not exist in datastore.");
         }
-    }
-
-    public async close()
-    {
-        // Do nothing.
     }
 }

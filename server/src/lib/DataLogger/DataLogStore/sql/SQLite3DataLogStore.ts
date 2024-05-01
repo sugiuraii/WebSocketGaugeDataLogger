@@ -84,10 +84,7 @@ export class SQLite3DataLogStore implements DataLogStore {
         const sql = "INSERT INTO " + this.activeTableName + " " + column_str + " VALUES " + value_str + ";";
         await this.runsqlAsync(this.database, sql, ...valuelist);
     }
-
-    public async close() {
-    }
-
+    
     // Wrapper of sqlite3 api to Promise
     private async runsqlAsync(db: Database, sql: string, ...params: any): Promise<Database> {
         return new Promise((resolve, reject) => {
