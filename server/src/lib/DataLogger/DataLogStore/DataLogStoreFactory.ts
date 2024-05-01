@@ -27,7 +27,7 @@ import { MemoryDataLogStore } from "./memory/MemoryDataLogStore";
 import { Database } from 'sqlite3';
 import { Pool } from 'mariadb';
 import { SQLite3DataLogStore } from "./sql/SQLite3DataLogStore";
-// /import { MariaDBDataLogStore } from "./sql/MariaDBDataLogStore";
+import { MariaDBDataLogStore } from "./sql/MariaDBDataLogStore";
 
 export class DataLogStoreFactory
 {
@@ -37,9 +37,7 @@ export class DataLogStoreFactory
     public static getSQLite3DataLogStore(database: Database) {
         return new SQLite3DataLogStore(database);
     }
-    /*
-    public static getMariaDBDataLogStore(connectionPool: Pool, tablename: string, keylist: string[], batchBufferSize: number) {
-        return new MariaDBDataLogStore(connectionPool, tablename, keylist, batchBufferSize);
+    public static getMariaDBDataLogStore(connectionPool: Pool, batchBufferSize: number) {
+        return new MariaDBDataLogStore(connectionPool, batchBufferSize);
     }
-    */
 }
