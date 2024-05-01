@@ -24,38 +24,58 @@
 
 import { DataLogStore } from "../DataLogStore";
 
+type DataTable = {time : number[], value : {[key : string] : number[]}}
+
 export class MemoryDataLogStore implements DataLogStore
 {
-    private readonly timeArray : number[] = [];
-    private readonly valueArray : {[key : string] : number[]};
-    private readonly maxStoreSize : number;
-    private readonly keyList: string[];
-    
-    public async getSamples() : Promise<{time: number[], value : {[key : string] : number[]}}> { return {time : this.timeArray, value : this.valueArray} }
-    public get MaxStoreSize() : number {return this.maxStoreSize}
-    
-    constructor(keylist: string[], maxStoreSize : number)
-    {
-        this.keyList = keylist;
+    private readonly dataTables = new Map<string, DataTable>();
+    private activeTableName: string | undefined = undefined;
+    private readonly maxStoreSize: number;
+    constructor(maxStoreSize: number){
         this.maxStoreSize = maxStoreSize;
-        this.valueArray = {};
-        for(let key of keylist)
-            this.valueArray[key] = [];   
     }
-
+    public async getTableList(): Promise<string[]> {
+        return [...this.dataTables.keys()];
+    }
+    public async createTable(tableName: string, keyNameList: string[]): Promise<void> {
+        this.dataTables.set(tableName, {time:[], value:{}});
+    }
+    public setActiveTable(tableName: string): void {
+        this.activeTableName = tableName;
+    }
+    public async flushBuffer(): Promise<void> {
+    }
+    public async dropTable(tableName: string): Promise<void> {
+        this.dataTables.delete(tableName);
+    }
+    
+    public async getSamples(tableName: string) : Promise<{time: number[], value : {[key : string] : number[]}}> { 
+        const samples = this.dataTables.get(tableName);
+        if(samples === undefined)
+            throw Error("Table name of " + tableName + " does not exist.");
+        return samples;
+    }
+    
     public async pushSample(time : number, value : {[key : string] : number}): Promise<void>
     {
-        if(this.timeArray.length >= this.maxStoreSize)
+        if(this.activeTableName === undefined) {
+            throw Error("Active table name of data store is undefined.");
+        }
+        const target = this.dataTables.get(this.activeTableName);
+        if(target === undefined)
+            throw Error("The table of active table name (" + this.activeTableName + ") dose not exist.");
+
+        if(target.time.length >= this.maxStoreSize)
         {
-            this.timeArray.shift();
-            Object.keys(this.valueArray).forEach(key => this.valueArray[key].shift());   
+            target.time.shift();
+            Object.keys(target.value).forEach(key => target.value[key].shift());   
         }
 
-        this.timeArray.push(time);
+        target.time.push(time);
         for(let key of Object.keys(value))
         {
-            if(this.valueArray[key])
-                this.valueArray[key].push(value[key])
+            if(target.value[key])
+                target.value[key].push(value[key])
             else
                 throw new Error("Key of " + key + " is not exist in datastore.");
         }
