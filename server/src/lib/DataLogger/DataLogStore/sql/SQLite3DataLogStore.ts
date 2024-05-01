@@ -23,22 +23,13 @@
  */
 
 import { DataLogStore } from "../DataLogStore";
-import { Database, Statement } from 'sqlite3';
+import { Database } from 'sqlite3';
 
 export class SQLite3DataLogStore implements DataLogStore {
     private readonly database: Database;
     private activeTableName: string|undefined = undefined;
-    private readonly keylist: string[];
-    // Value buffer to store previous value
-    private readonly valuebuffer: { [key: string]: number };
-    constructor(database: Database, tablename: string, keylist: string[]) {
+    constructor(database: Database) {
         this.database = database;
-        this.activeTableName = tablename;
-        this.keylist = keylist;
-        this.valuebuffer = {};
-        // Reset value buffer
-        for(let key of keylist)
-            this.valuebuffer[key] = 0;
     }
     public async getTableList(): Promise<string[]> {
         const tables = await this.allsqlAsync(this.database, "SHOW TABLES;");
@@ -46,9 +37,8 @@ export class SQLite3DataLogStore implements DataLogStore {
     }
     
     public async createTable(tableName: string, keyNameList: string[]): Promise<void> {
-        const sql = "CREATE TABLE " + this.activeTableName + " (time REAL, " + keyNameList.map(kn => kn + " REAL").join(', ') + ");";
+        const sql = "CREATE TABLE " + tableName + " (time REAL, " + keyNameList.map(kn => kn + " REAL").join(', ') + ");";
         await this.runsqlAsync(this.database, sql);
-
     }
     
     public setActiveTable(tableName: string): void {
@@ -59,37 +49,37 @@ export class SQLite3DataLogStore implements DataLogStore {
     }
     
     public async dropTable(tableName: string): Promise<void> {
-        await this.runsqlAsync(this.database, "DROP TABLE "+tableName+";");
+        await this.runsqlAsync(this.database, "DROP TABLE " + tableName + ";");
     }
 
     public async getSamples(tableName: string) : Promise<{time: number[], value : {[key : string] : number[]}}> {
-        const query = "SELECT time, " + this.keylist.join(', ') + " FROM " + tableName + ";";
+        const query = "SELECT * FROM " + tableName + ";";
         const rows = await this.allsqlAsync(this.database, query);
         const time: number[] = [];
         const value: { [key: string]: number[] } = {};
-        for(let key of this.keylist)
-            value[key] = [];
 
         for (let row of rows) {
-            time.push(row["time"]);
-            this.keylist.forEach(key => value[key].push(row[key]));
+            Object.keys(row).forEach(key => {
+                if(key === "time")
+                    time.push(row[key]);
+                else {
+                    if(!(key in value))
+                        value[key] = [];
+                    value[key].push(row[key]);
+                }
+            });
         }
         return {time : time, value : value};
     }
 
     public async pushSample(time: number, value: { [key: string]: number }): Promise<void> {
-        const column_str = "(time," + this.keylist.join(",") + ")";
-        const value_str = "(?," + new Array<string>(this.keylist.length).fill('?').join(",") + ")";
+        const key_list = Object.keys(value);
+        const column_str = "(time," + key_list.join(",") + ")";
+        const value_str = "(?," + new Array<string>(key_list.length).fill('?').join(",") + ")";
         const valuelist: number[] = [];
         valuelist.push(time);
-        for (let key of this.keylist) {
-            if (value[key] !== undefined) {
-                valuelist.push(value[key])
-                this.valuebuffer[key] = value[key];
-            }
-            else
-                // Retreve previous value from valuebuffer
-                valuelist.push(this.valuebuffer[key]);
+        for (let key of key_list) {
+            valuelist.push(value[key])
         }
         const sql = "INSERT INTO " + this.activeTableName + " " + column_str + " VALUES " + value_str + ";";
         await this.runsqlAsync(this.database, sql, ...valuelist);
