@@ -41,8 +41,9 @@ export class MemoryDataLogStore implements DataLogStore
         const value : {[key : string] : number[]} = {};
         keyNameList.forEach(key => value[key] = []);
         this.dataTables.set(tableName, {time:[], value:value});
+        this.setActiveTable(tableName);
     }
-    public setActiveTable(tableName: string): void {
+    private setActiveTable(tableName: string): void {
         this.activeTableName = tableName;
     }
     public async flushBuffer(): Promise<void> {

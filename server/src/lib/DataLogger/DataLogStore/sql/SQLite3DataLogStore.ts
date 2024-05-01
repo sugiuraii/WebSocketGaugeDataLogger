@@ -39,9 +39,10 @@ export class SQLite3DataLogStore implements DataLogStore {
     public async createTable(tableName: string, keyNameList: string[]): Promise<void> {
         const sql = "CREATE TABLE " + tableName + " (time REAL, " + keyNameList.map(kn => kn + " REAL").join(', ') + ");";
         await this.runsqlAsync(this.database, sql);
+        this.setActiveTable(tableName);
     }
     
-    public setActiveTable(tableName: string): void {
+    private setActiveTable(tableName: string): void {
         this.activeTableName = tableName;
     }
     

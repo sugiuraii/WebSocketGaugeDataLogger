@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/*
+
 import { DataLogStore } from "../DataLogStore";
 import { Pool } from 'mariadb';
 import { DataLogStoreWriteCache} from "../writecache/DataLogStoreWriteCahce";
@@ -29,9 +29,11 @@ import { DataLogStoreWriteCache} from "../writecache/DataLogStoreWriteCahce";
 export class MariaDBDataLogStore implements DataLogStore {
     private readonly connectionPool: Pool;
     private activeTableName: string|undefined = undefined;
-    private readonly batchBuffer: DataLogStoreWriteCache | undefined = undefined;
+    private batchBuffer: DataLogStoreWriteCache | undefined = undefined;
+    private readonly batchBufferSize: number;
     constructor(connectionPool: Pool, batchBufferSize: number) {
         this.connectionPool = connectionPool;
+        this.batchBufferSize = batchBufferSize;
     }
 
     public async getTableList(): Promise<string[]> {
@@ -42,16 +44,17 @@ export class MariaDBDataLogStore implements DataLogStore {
     public async createTable(tableName: string, keyNameList: string[]): Promise<void> {
         const sql = "CREATE TABLE " + tableName + " (time REAL, " + keyNameList.map(kn => kn + " REAL").join(', ') + ");";
         await this.connectionPool.query(sql);
-
+        const newActiveTableName = tableName;
+        this.setActiveTable(newActiveTableName);
         this.batchBuffer = new DataLogStoreWriteCache(async vals => {
-            const column_str = "(time," + this.keylist.join(",") + ")";
-            const value_str = "(?," + new Array<string>(this.keylist.length).fill('?').join(",") + ")";
-            const sql = "INSERT INTO " + this.tablename + " " + column_str + " VALUES " + value_str + ";";
+            const column_str = "(time," + keyNameList.join(",") + ")";
+            const value_str = "(?," + new Array<string>(keyNameList.length).fill('?').join(",") + ")";
+            const sql = "INSERT INTO " + newActiveTableName + " " + column_str + " VALUES " + value_str + ";";
             this.connectionPool.batch(sql, vals);
-        }, batchBufferSize)
+        }, this.batchBufferSize);
     }
 
-    public setActiveTable(tableName: string): void {
+    private setActiveTable(tableName: string): void {
         if(this.batchBuffer !== undefined)
             this.flushBuffer();
         this.activeTableName = tableName;
@@ -103,4 +106,3 @@ export class MariaDBDataLogStore implements DataLogStore {
     }
 
 }
-*/

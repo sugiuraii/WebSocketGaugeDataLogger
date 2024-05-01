@@ -83,7 +83,6 @@ export class DataLoggerController
             store = DataLogStoreFactory.getSQLite3DataLogStore(new Database(":memory:"));
             //store = DataLogStoreFactory.getMariaDBDataLogStore(mariadb.createPool({host: '0.0.0.0', user: 'test', password: 'test', database: 'test1', connectionLimit: 5}), "testtable1", command.ParameterCodeList, 20);
             await store.createTable(tablename, command.ParameterCodeList);
-            store.setActiveTable(tablename);
             try
             {
                 await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);

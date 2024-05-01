@@ -27,7 +27,6 @@ export interface DataLogStore
     getTableList():Promise<string[]>;
     getSamples(tableName: string) : Promise<{time: number[], value : {[key : string] : number[]}}>;
     createTable(tableName: string, keyNameList: string[]): Promise<void>;
-    setActiveTable(tableName: string): void;
     pushSample(time : number, value : {[key : string] : number}) : Promise<void>;
     flushBuffer() : Promise<void>;
     dropTable(tableName:string): Promise<void>;
