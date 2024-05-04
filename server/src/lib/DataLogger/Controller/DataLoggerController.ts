@@ -47,7 +47,9 @@ export class DataLoggerController
         const service = this.service;
         const stopPollingInterval = 10;
         
-        let store = DataLogStoreFactory.getMemoryDataLogStore(["null"], 1);
+        //const store = DataLogStoreFactory.getMemoryDataLogStore(command.ParameterCodeList, command.DataStoreSize);
+        //const store = DataLogStoreFactory.getSQLite3DataLogStore(new Database(":memory:"));
+        const store = DataLogStoreFactory.getMariaDBDataLogStore(mariadb.createPool({host: '0.0.0.0', user: 'test', password: 'test', database: 'test1', connectionLimit: 5}), 20);
         let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, TableName: "", ParameterCodeList : [], WebsocketMessageInterval : 0}
         
         app.get('/api/store/tablelist', async (_, res) => res.send(JSON.stringify(await store.getTableList())));
@@ -87,9 +89,6 @@ export class DataLoggerController
             runningCommand = command;
             this.logger.info("Logger service is stated. Running command is ...");
             this.logger.info(JSON.stringify(command));
-            //store = DataLogStoreFactory.getMemoryDataLogStore(command.ParameterCodeList, command.DataStoreSize);
-            //store = DataLogStoreFactory.getSQLite3DataLogStore(new Database(":memory:"));
-            store = DataLogStoreFactory.getMariaDBDataLogStore(mariadb.createPool({host: '0.0.0.0', user: 'test', password: 'test', database: 'test1', connectionLimit: 5}), 20);
             await store.createTable(runningCommand.TableName, command.ParameterCodeList);
             try
             {
