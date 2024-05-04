@@ -37,8 +37,9 @@ export class MariaDBDataLogStore implements DataLogStore {
     }
 
     public async getTableList(): Promise<string[]> {
-        const tables = await this.connectionPool.query("SHOW TABLES;");
-        return tables;
+        const tables: any[] = await this.connectionPool.query("SHOW TABLES;");
+        const tableList: string[] = tables.map(v => Object.values(v)[0] as string);
+        return tableList;
     }
 
     public async createTable(tableName: string, keyNameList: string[]): Promise<void> {
