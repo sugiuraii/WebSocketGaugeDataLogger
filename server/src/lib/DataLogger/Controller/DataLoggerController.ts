@@ -69,7 +69,7 @@ export class DataLoggerController
         app.get('/api/store/drop', async (req, _) => {
             const tablename = req.query.tablename as string | undefined;
             if(tablename === undefined) throw Error("Query of table name is not defined.");
-            store.dropTable(tablename);
+            await store.dropTable(tablename);
             this.logger.info("Data table : " + tablename + " is dropped, by the request from " + req.headers.host);
         });
         app.get('/api/store/getcodelist', async (req, res) => {
