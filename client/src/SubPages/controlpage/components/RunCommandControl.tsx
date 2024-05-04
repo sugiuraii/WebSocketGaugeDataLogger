@@ -61,7 +61,7 @@ export const RunCommandControl : FunctionComponent<RunCommandControlProps> = (p)
     }
     
     const handleSet = () => {
-        const dat = {DataStoreInterval : dataStoreInterval, DataStoreSize : dataStoreSize, WebsocketMessageInterval : websocketmessageInterval, ParameterCodeList : enabledCode};
+        const dat = {TableName: "test1", DataStoreInterval : dataStoreInterval, DataStoreSize : dataStoreSize, WebsocketMessageInterval : websocketmessageInterval, ParameterCodeList : enabledCode};
         p.onSet(dat);
     };
 
