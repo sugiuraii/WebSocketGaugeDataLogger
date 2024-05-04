@@ -31,7 +31,7 @@ import { ChartPanel } from "./components/ChartPanel";
 import { CodeSelector } from "./components/CodeSelector"
 
 export const ChartPage: FunctionComponent = () => {
-    const [selectedTableName, setSelectedTableName] = useState<string>("---");
+    const [selectedTableName, setSelectedTableName] = useState<string>("");
     const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
     const [codeToSelect, setCodeToSelect] = useState<WebsocketParameterCode[]>([]);
     const [isTimeAxisElapsed, setTimeAxisElapsed] = useState<boolean>(false);
@@ -47,6 +47,13 @@ export const ChartPage: FunctionComponent = () => {
     }, []);
 
     const tableNameListElem = tableNameList.map(c => <option key={c}>{c}</option>);
+    const handleGetParameterList = async () => {
+        const params = {tablename: selectedTableName};
+        const query = new URLSearchParams(params);
+        const codelist = await fetch("/api/store/getcodelist?" + query).then(res => res.json());
+        setCodeToSelect(codelist);
+    }
+
     const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
         if (leftAxisCodeList.length == 0 && rightAxisCodeList.length == 0) {
             alert("Set parameter code for left or right axis.");
@@ -150,10 +157,14 @@ export const ChartPage: FunctionComponent = () => {
 
     const handleDeleteTable = async () => {
         const tableToDelte = selectedTableName;
+        if(tableToDelte === "")
+            return;
         if(window.confirm("Delete table of '" + tableToDelte + "'?")) {
             const params = {tablename: tableToDelte};
             const query = new URLSearchParams(params);
             await fetch("/api/store/drop?" + query);
+            const tableNameList = await fetch("/api/store/tablelist").then(res => res.json());
+            setTableNameList(tableNameList);
         }
     }
 
@@ -165,13 +176,10 @@ export const ChartPage: FunctionComponent = () => {
                         <Card>
                             <Card.Header>Table select.</Card.Header>
                             <Card.Body>
-                                <Form.Control as="select" value={selectedTableName} onChange={e => {
-                                    if (e.target.value !== "---")
-                                        setSelectedTableName(e.target.value);
-                                }}>
+                                <Form.Control as="select" value={selectedTableName} onChange={e => setSelectedTableName(e.target.value)}>
                                     {tableNameListElem}
                                 </Form.Control>
-                                <Button variant="primary">Load</Button>
+                                <Button variant="primary" onClick={handleGetParameterList}>Load</Button>
                                 <Button variant="danger" onClick={handleDeleteTable}>Delete</Button>
                             </Card.Body>
                         </Card>
