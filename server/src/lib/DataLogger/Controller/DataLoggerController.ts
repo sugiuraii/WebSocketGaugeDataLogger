@@ -50,7 +50,7 @@ export class DataLoggerController
         let store = DataLogStoreFactory.getMemoryDataLogStore(["null"], 1);
         let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, TableName: "", ParameterCodeList : [], WebsocketMessageInterval : 0}
         
-        app.get('api/store/tablelist', async (_, res) => res.send(JSON.stringify(await store.getTableList())));
+        app.get('/api/store/tablelist', async (_, res) => res.send(JSON.stringify(await store.getTableList())));
         app.get('/api/store/get', async (req, res) => {
             const tablename = req.query.tablename as string | undefined;
             if(tablename === undefined) throw Error("Query of table name is not defined.");
