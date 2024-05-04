@@ -70,8 +70,8 @@ export class MariaDBDataLogStore implements DataLogStore {
         await this.connectionPool.query("DROP TABLE " + tableName + ";");
     }
 
-    public async getSamples(): Promise<{ time: number[], value: { [key: string]: number[] } }> {
-        const query = "SELECT * FROM " + this.activeTableName + ";";
+    public async getSamples(tableName: string): Promise<{ time: number[], value: { [key: string]: number[] } }> {
+        const query = "SELECT * FROM " + tableName + ";";
         const rows = await this.connectionPool.query(query);
         const time: number[] = [];
         const value: { [key: string]: number[] } = {};
