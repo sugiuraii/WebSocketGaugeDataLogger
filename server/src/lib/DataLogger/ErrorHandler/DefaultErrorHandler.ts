@@ -22,8 +22,10 @@
  * THE SOFTWARE.
  */
 import { Request, Response, NextFunction } from "express"
+import log4js from "log4js";
 
 export const DefaultErrorHandler = (err: Error, req: Request, res: Response, next:NextFunction) => {
-    console.error(err.stack)
-    res.status(500).send(err.stack);
+    const logger = log4js.getLogger();
+    logger.error(err);
+    res.status(500).send(err);
 }
