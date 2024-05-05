@@ -30,6 +30,7 @@ import log4js from "log4js";
 import { DataLogStoreFactory } from "../DataLogStore/DataLogStoreFactory";
 import { convertDataLogStoreToCsv } from "../DataLogStore/DataLogStoreUtils";
 import * as mariadb from "mariadb";
+import {asyncWrap} from "./util/AsyncFunctionWrapper"
 
 export class DataLoggerController
 {
@@ -52,31 +53,31 @@ export class DataLoggerController
         const store = DataLogStoreFactory.getMariaDBDataLogStore(mariadb.createPool({host: '0.0.0.0', user: 'test', password: 'test', database: 'test1', connectionLimit: 5}), 20);
         let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, TableName: "", ParameterCodeList : [], WebsocketMessageInterval : 0}
         
-        app.get('/api/store/tablelist', async (_, res) => res.send(JSON.stringify(await store.getTableList())));
-        app.get('/api/store/get', async (req, res) => {
+        app.get('/api/store/tablelist', asyncWrap(async (_, res) => res.send(JSON.stringify(await store.getTableList()))));
+        app.get('/api/store/get', asyncWrap(async (req, res) => {            
             const tablename = req.query.tablename as string | undefined;
             if(tablename === undefined) throw Error("Query of table name is not defined.");
             const samples = await store.getSamples(tablename);
             res.send(JSON.stringify(samples));
             this.logger.info("Data store is requested from " + req.headers.host);
-        });
-        app.get('/api/store/getAsCSV', async (req, res) => {
+        }));
+        app.get('/api/store/getAsCSV', asyncWrap(async (req, res) => {
             const tablename = req.query.tablename as string | undefined;
             if(tablename === undefined) throw Error("Query of table name is not defined.");
             await res.send(convertDataLogStoreToCsv(store, tablename));
             this.logger.info("Data store is requested by csv format, from " + req.headers.host);
-        });
-        app.get('/api/store/drop', async (req, _) => {
+        }));
+        app.get('/api/store/drop', asyncWrap(async (req, _) => {
             const tablename = req.query.tablename as string | undefined;
             if(tablename === undefined) throw Error("Query of table name is not defined.");
             await store.dropTable(tablename);
             this.logger.info("Data table : " + tablename + " is dropped, by the request from " + req.headers.host);
-        });
-        app.get('/api/store/getcodelist', async (req, res) => {
+        }));
+        app.get('/api/store/getcodelist', asyncWrap(async (req, res) => {
             const tablename = req.query.tablename as string | undefined;
             if(tablename === undefined) throw Error("Query of table name is not defined.");
             res.send(JSON.stringify(Object.keys((await store.getSamples(tablename)).value)))
-        });
+        }));
         
         app.get('/api/setting/available_code_list', (_, res) => res.send(service.getAvailableParameterCodeList()));
         app.get('/api/state', (_, res) => {
@@ -84,7 +85,7 @@ export class DataLoggerController
             res.send(JSON.stringify(runState));
         })
 
-        app.post('/api/run', async (req, res) => {
+        app.post('/api/run', asyncWrap(async (req, res) => {
             const command : RunCommandModel = req.body;
             runningCommand = command;
             this.logger.info("Logger service is stated. Running command is ...");
@@ -107,9 +108,9 @@ export class DataLoggerController
                 else
                     throw e;
             }
-        });
+        }));
 
-        app.post('/api/stop', async(_, res) => 
+        app.post('/api/stop', asyncWrap(async(_, res) => 
         {
             service.stop();
             while(!service.IsRunning) {
@@ -119,6 +120,6 @@ export class DataLoggerController
             const runState : StateModel = {IsRunning : service.IsRunning, RunningCommand : runningCommand};
             res.send(JSON.stringify(runState));
             this.logger.info("Logger service is stopped.");
-        });
+        }));
     }
 }
