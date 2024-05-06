@@ -46,6 +46,10 @@ export const ChartPage: FunctionComponent = () => {
     const tableNameListElem = tableNameList.map(c => <option key={c}>{c}</option>);
     
     const handleDataLoad = async () => {
+        if(selectedTableName.length === 0) {
+            alert("Table is not selected.");
+            return;
+        }
         const params = { tablename: selectedTableName };
         const query = new URLSearchParams(params);
         const res = await axiosWrapper.get("/api/store/getcodelist?" + query);
@@ -64,6 +68,8 @@ export const ChartPage: FunctionComponent = () => {
         setTableNameList(tableList);
         if (tableList.length > 0)
             setSelectedTableName(tableList[0]);
+        else
+            setSelectedTableName("");
     }
 
     const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
@@ -169,8 +175,10 @@ export const ChartPage: FunctionComponent = () => {
 
     const handleDeleteTable = async () => {
         const tableToDelte = selectedTableName;
-        if (tableToDelte === "")
-            return;
+        if (tableToDelte === "") {
+                alert("Table is not selected.");
+                return;
+        }
         if (window.confirm("Delete table of '" + tableToDelte + "'?")) {
             const params = { tablename: tableToDelte };
             const query = new URLSearchParams(params);
