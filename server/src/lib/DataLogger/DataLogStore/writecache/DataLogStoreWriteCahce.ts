@@ -39,7 +39,12 @@ export class DataLogStoreWriteCache {
     }
 
     public async flush() : Promise<void> {
-        await this.BatchWriteFunction(this.Data);
+        if(this.Data.length > 0)
+            await this.BatchWriteFunction(this.Data);
+        this.clear();
+    }
+
+    public clear(): void {
         this.Data = [];
     }
 }

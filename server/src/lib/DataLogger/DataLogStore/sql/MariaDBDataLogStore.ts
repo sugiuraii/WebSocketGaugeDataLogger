@@ -46,19 +46,20 @@ export class MariaDBDataLogStore implements DataLogStore {
         const sql = "CREATE TABLE " + tableName + " (time REAL, " + keyNameList.map(kn => kn + " REAL").join(', ') + ");";
         await this.connectionPool.query(sql);
         const newActiveTableName = tableName;
-        this.setActiveTable(newActiveTableName);
+
+        // Flush remaining data in buffer, before switching table.
+        // This flush call can be deleted if this makes so much issues. (In this case, data in buffer will be discarded. However, this will not makes so much issue.)
+        if(this.batchBuffer !== undefined)
+            await this.flushBuffer();
+        this.activeTableName = newActiveTableName;
+
+        // Re-create (and overwrite) buffer with new table/column definition.
         this.batchBuffer = new DataLogStoreWriteCache(async vals => {
             const column_str = "(time," + keyNameList.join(",") + ")";
             const value_str = "(?," + new Array<string>(keyNameList.length).fill('?').join(",") + ")";
             const sql = "INSERT INTO " + newActiveTableName + " " + column_str + " VALUES " + value_str + ";";
             this.connectionPool.batch(sql, vals);
         }, this.batchBufferSize);
-    }
-
-    private setActiveTable(tableName: string): void {
-        if(this.batchBuffer !== undefined)
-            this.flushBuffer();
-        this.activeTableName = tableName;
     }
 
     public async flushBuffer(): Promise<void> {
