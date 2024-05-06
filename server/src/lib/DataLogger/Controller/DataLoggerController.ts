@@ -67,11 +67,23 @@ export class DataLoggerController
             await res.send(convertDataLogStoreToCsv(store, tablename));
             this.logger.info("Data store is requested by csv format, from " + req.headers.host);
         }));
-        app.get('/api/store/drop', asyncWrap(async (req, _) => {
+        app.get('/api/store/drop', asyncWrap(async (req, res) => {
             const tablename = req.query.tablename as string | undefined;
-            if(tablename === undefined) throw Error("Query of table name is not defined.");
-            await store.dropTable(tablename);
-            this.logger.info("Data table : " + tablename + " is dropped, by the request from " + req.headers.host);
+            if (tablename === undefined) throw Error("Query of table name is not defined.");
+            try {
+                await store.dropTable(tablename);
+                const result: RunResultModel = { IsSucceed: true, Error: "" };
+                await res.send(result);
+                this.logger.info("Data table : " + tablename + " is dropped, by the request from " + req.headers.host);
+            } catch (e) {
+                if (e instanceof Error) {
+                    this.logger.error(e);
+                    const result: RunResultModel = { IsSucceed: false, Error: e.message };
+                    res.send(result);
+                }
+                else
+                    throw e;
+            }
         }));
         app.get('/api/store/getcodelist', asyncWrap(async (req, res) => {
             const tablename = req.query.tablename as string | undefined;

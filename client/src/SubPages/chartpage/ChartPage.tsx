@@ -174,7 +174,9 @@ export const ChartPage: FunctionComponent = () => {
         if (window.confirm("Delete table of '" + tableToDelte + "'?")) {
             const params = { tablename: tableToDelte };
             const query = new URLSearchParams(params);
-            await axios.get("/api/store/drop?" + query);
+            const res = await axiosWrapper.get("/api/store/drop?" + query);
+            if(!res.data.IsSucceed)
+                window.alert("Error : " + res.data.Error);
             await handleRefreshTableList(); // Auto refresh after deleting table
         }
     }
