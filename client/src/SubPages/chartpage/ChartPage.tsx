@@ -30,6 +30,7 @@ import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/
 import { ChartPanel } from "./components/ChartPanel"
 import { CodeSelector } from "./components/CodeSelector"
 import axios from 'axios'
+import { axiosWrapper } from "lib/axios-utils/AxiosErrorHandlerWrapper"
 
 export const ChartPage: FunctionComponent = () => {
     const [selectedTableName, setSelectedTableName] = useState<string>("");
@@ -37,21 +38,22 @@ export const ChartPage: FunctionComponent = () => {
     const [codeToSelect, setCodeToSelect] = useState<WebsocketParameterCode[]>([]);
     const [isTimeAxisElapsed, setTimeAxisElapsed] = useState<boolean>(false);
     const [tableNameList, setTableNameList] = useState<string[]>([]);
-    
+
     const tableNameListElem = tableNameList.map(c => <option key={c}>{c}</option>);
     const handleGetParameterList = async () => {
-        const params = {tablename: selectedTableName};
+        const params = { tablename: selectedTableName };
         const query = new URLSearchParams(params);
-        const codelist = (await axios.get("/api/store/getcodelist?" + query)).data;
-        setCodeToSelect(codelist);
+        const res = await axiosWrapper.get("/api/store/getcodelist?" + query);
+        setCodeToSelect(res.data);
     }
 
     const handleRefreshTableList = async () => {
-        const tableList = (await axios.get("/api/store/tablelist")).data;
-        if(!Array.isArray(tableList))
+        const res = await axiosWrapper.get("/api/store/tablelist");
+        const tableList = res.data;
+        if (!Array.isArray(tableList))
             throw new TypeError("table list is not array.")
         setTableNameList(tableList);
-        if(tableList.length > 0)
+        if (tableList.length > 0)
             setSelectedTableName(tableList[0]);
     }
 
@@ -156,10 +158,10 @@ export const ChartPage: FunctionComponent = () => {
 
     const handleDeleteTable = async () => {
         const tableToDelte = selectedTableName;
-        if(tableToDelte === "")
+        if (tableToDelte === "")
             return;
-        if(window.confirm("Delete table of '" + tableToDelte + "'?")) {
-            const params = {tablename: tableToDelte};
+        if (window.confirm("Delete table of '" + tableToDelte + "'?")) {
+            const params = { tablename: tableToDelte };
             const query = new URLSearchParams(params);
             await axios.get("/api/store/drop?" + query);
             await handleRefreshTableList(); // Auto refresh after deleting table
@@ -174,11 +176,7 @@ export const ChartPage: FunctionComponent = () => {
                         <Card>
                             <Card.Header>Table select.</Card.Header>
                             <Card.Body>
-                                <Form.Control as="select" value={selectedTableName} onChange={e => {
-                                    setSelectedTableName(e.target.value);
-                                    handleGetParameterList();
-                                }
-                                }>
+                                <Form.Control as="select" value={selectedTableName} onChange={e => setSelectedTableName(e.target.value)}>
                                     {tableNameListElem}
                                 </Form.Control>
                                 <Button variant="secondary" onClick={handleRefreshTableList}>Refresh List</Button>
