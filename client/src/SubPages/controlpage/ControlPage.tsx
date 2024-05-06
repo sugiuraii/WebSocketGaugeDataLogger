@@ -50,7 +50,7 @@ export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
     }, []);
 
     const pageElem = appState.IsRunning?
-                <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await axiosWrapper.post('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
+                <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await axiosWrapper.post('/api/stop')}/>
                 :
                 <RunCommandControl
                     defaultSetting={appState.RunningCommand}
@@ -58,7 +58,7 @@ export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
                     onSet={ async (p) => 
                     {
                         console.log(p);
-                        const res :  RunResultModel = (await axiosWrapper.post('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p)})).data;
+                        const res :  RunResultModel = (await axiosWrapper.post('/api/run', JSON.stringify(p), {headers: { 'Content-Type': 'application/json'}})).data;
                         console.log(res);
                         if(!res.IsSucceed)
                             window.alert("Error : " + res.Error);
