@@ -25,7 +25,7 @@
 import { useState, FunctionComponent, useEffect } from "react"
 import * as Echarts from 'echarts'
 import React from "react"
-import { Card, Col, Container, Form, Row, Button } from "react-bootstrap"
+import { Card, Col, Container, Form, Row, Button, CardBody } from "react-bootstrap"
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode"
 import { ChartPanel } from "./components/ChartPanel"
 import { CodeSelector } from "./components/CodeSelector"
@@ -33,18 +33,27 @@ import axios from 'axios'
 import { axiosWrapper } from "lib/axios-utils/AxiosErrorHandlerWrapper"
 
 export const ChartPage: FunctionComponent = () => {
-    const [selectedTableName, setSelectedTableName] = useState<string>("");
-    const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
-    const [codeToSelect, setCodeToSelect] = useState<WebsocketParameterCode[]>([]);
-    const [isTimeAxisElapsed, setTimeAxisElapsed] = useState<boolean>(false);
     const [tableNameList, setTableNameList] = useState<string[]>([]);
+    const [selectedTableName, setSelectedTableName] = useState<string>("");
+    const [isTimeAxisElapsed, setTimeAxisElapsed] = useState<boolean>(false);
 
+    const [loadedTableName, setLoadedTableName] = useState<string>("");
+    const [dataStore, setDataStore] = useState<{ time: number[], value: { [key: string]: number[] } }>();
+    const [codeToSelect, setCodeToSelect] = useState<WebsocketParameterCode[]>([]);
+
+    const [chartOptions, setChartOptions] = useState<Echarts.EChartOption[]>([]);
+    
     const tableNameListElem = tableNameList.map(c => <option key={c}>{c}</option>);
-    const handleGetParameterList = async () => {
+    
+    const handleDataLoad = async () => {
         const params = { tablename: selectedTableName };
         const query = new URLSearchParams(params);
         const res = await axiosWrapper.get("/api/store/getcodelist?" + query);
         setCodeToSelect(res.data);
+        const res2 = await axiosWrapper.get("/api/store/get?" + query);
+        setDataStore(res2.data);
+
+        setLoadedTableName(selectedTableName);
     }
 
     const handleRefreshTableList = async () => {
@@ -62,9 +71,11 @@ export const ChartPage: FunctionComponent = () => {
             alert("Set parameter code for left or right axis.");
             return;
         }
+        if(dataStore === undefined) {
+            alert("Data store is undefined.");
+            return;
+        }
 
-        const res = await axios.get("/api/store");
-        const dataStore: { time: number[], value: { [key: string]: number[] } } = res.data;
         const startTime = dataStore.time[0];
         const valueTimeStore = new Map(Object.keys(dataStore.value).map(k => [k, dataStore.value[k].map((v, i) => [new Date(dataStore.time[i]).toISOString(), v])]));
         const valueElapsedSecStore = new Map(Object.keys(dataStore.value).map(k => [k, dataStore.value[k].map((v, i) => [(dataStore.time[i] - startTime) / 1000, v])]));
@@ -179,9 +190,11 @@ export const ChartPage: FunctionComponent = () => {
                                 <Form.Control as="select" value={selectedTableName} onChange={e => setSelectedTableName(e.target.value)}>
                                     {tableNameListElem}
                                 </Form.Control>
+                                <Button variant="primary" onClick={handleDataLoad}>Load</Button>
                                 <Button variant="secondary" onClick={handleRefreshTableList}>Refresh List</Button>
                                 <Button variant="danger" onClick={handleDeleteTable}>Delete</Button>
                             </Card.Body>
+                            <Card.Footer>Active table name : {loadedTableName}</Card.Footer>
                         </Card>
                         <Card>
                             <Card.Header>Time axis settings</Card.Header>
