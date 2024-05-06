@@ -31,28 +31,32 @@ export class AxiosErrorHandlerWrapper {
         this.errorHanlder = errorHandler;
     }
 
-    public async get(url: string, config?: AxiosRequestConfig<any> | undefined):Promise<AxiosResponse<any, any> | undefined> {
+    public async get(url: string, config?: AxiosRequestConfig<any> | undefined):Promise<AxiosResponse<any, any>> {
         try {
-            return await axios.get(url, config);
+            const res = await axios.get(url, config);
+            if(res !== undefined)
+                return res;
+            else
+                throw new Error("Result of axios.get() is undefinded.");
         } catch (e) {
             this.errorHanlder(e);
-            return undefined;
+            throw e;
         }
     }
 
-    public async post(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<any, any> | undefined> {
+    public async post(url: string, data?: any, config?: AxiosRequestConfig<any> | undefined): Promise<AxiosResponse<any, any>> {
         try{
             return await axios.post(url, data, config);
         } catch(e){
             this.errorHanlder(e);
-            return undefined;
+            throw e;
         }
     }
 }
 
 export const axiosWrapper = new AxiosErrorHandlerWrapper(reason => {
     if(reason instanceof AxiosError) {
-        const message = reason.message + "\n" + reason.response?.data;
+        const message = reason.message + "\n" + reason.request.responseText;
         window.alert(message);
     } else {
         throw reason;
