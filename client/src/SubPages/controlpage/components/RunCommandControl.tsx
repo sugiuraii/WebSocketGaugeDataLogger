@@ -37,7 +37,7 @@ type RunCommandControlProps = {
 export const RunCommandControl : FunctionComponent<RunCommandControlProps> = (p) =>
 {
     const selectOptions = p.parameterCodeToSelect.map(c => <option key={c}>{c}</option>);
-
+    const [tableName, setTableName] = useState("");
     const [dataStoreSize, setDataStoreSize] = useState(p.defaultSetting.DataStoreSize);
     const [dataStoreInterval, setDataStoreInterval] = useState(p.defaultSetting.DataStoreInterval);
     const [websocketmessageInterval, setWebsocketmessageInterval] = useState(p.defaultSetting.WebsocketMessageInterval);
@@ -61,7 +61,7 @@ export const RunCommandControl : FunctionComponent<RunCommandControlProps> = (p)
     }
     
     const handleSet = () => {
-        const dat = {TableName: "test1", DataStoreInterval : dataStoreInterval, DataStoreSize : dataStoreSize, WebsocketMessageInterval : websocketmessageInterval, ParameterCodeList : enabledCode};
+        const dat = {TableName: tableName, DataStoreInterval : dataStoreInterval, DataStoreSize : dataStoreSize, WebsocketMessageInterval : websocketmessageInterval, ParameterCodeList : enabledCode};
         p.onSet(dat);
     };
 
@@ -71,6 +71,8 @@ export const RunCommandControl : FunctionComponent<RunCommandControlProps> = (p)
         <Card>
             <Form>
                 <Form.Group controlId="runSettinng">
+                    <Form.Label>Table name to store.</Form.Label>
+                    <Form.Control type="text" onChange={(evt) => setTableName(evt.target.value)} />
                     <Form.Label>DataStoreSize</Form.Label>
                     <Form.Control type="number" min={0} value={dataStoreSize} onChange={(evt) => setDataStoreSize(Number(evt.target.value))} />
                     <Form.Label>DataStoreInterval(ms)</Form.Label>

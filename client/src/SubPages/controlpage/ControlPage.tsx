@@ -30,6 +30,7 @@ import { useEffect, useState, FunctionComponent } from "react";
 import { RunCommandControl } from "./components/RunCommandControl";
 import { RunStateControl } from "./components/RunStateControl";
 import axios from 'axios';
+import { axiosWrapper } from "lib/axios-utils/AxiosErrorHandlerWrapper"
 
 export type ControlPageProps = 
 {
@@ -49,7 +50,7 @@ export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
     }, []);
 
     const pageElem = appState.IsRunning?
-                <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await axios.post('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
+                <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await axiosWrapper.post('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
                 :
                 <RunCommandControl
                     defaultSetting={appState.RunningCommand}
@@ -57,7 +58,7 @@ export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
                     onSet={ async (p) => 
                     {
                         console.log(p);
-                        const res :  RunResultModel = (await axios.post('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p)})).data;
+                        const res :  RunResultModel = (await axiosWrapper.post('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p)})).data;
                         console.log(res);
                         if(!res.IsSucceed)
                             window.alert("Error : " + res.Error);
