@@ -29,6 +29,9 @@ import * as jsonc from "jsonc-parser";
 import * as fs from "fs";
 import log4js from "log4js";
 import { DefaultErrorHandler } from "lib/DataLogger/ErrorHandler/DefaultErrorHandler";
+import { DataLogStoreFactory } from "lib/DataLogger/DataLogStore/DataLogStoreFactory";
+import * as sqlite3 from "sqlite3"
+import * as mariadb from "mariadb"
 
 log4js.configure({
     appenders: {
@@ -46,10 +49,35 @@ require('./server.appconfig.jsonc');
 
 type AppConfig =
     {
-        port: number
+        port: number,
+        store: "memory" | "sqlite3" | "mariadb",
+        memorystore: {
+            maxStoreSize: number
+        },
+        sqlite3store: {
+            dbname: string
+        },
+        mariadbstore: {
+            host: string,
+            user: string,
+            password: string,
+            database: string
+        }
     };
 
 const readAppConfig = (): AppConfig => jsonc.parse(fs.readFileSync("./config/server.appconfig.jsonc", "utf8"));
+
+const createStore = (config :AppConfig) => {
+    const mariadb_batch_buffer_size = 50;
+    if(config.store.toLowerCase() === "memory")
+        return DataLogStoreFactory.getMemoryDataLogStore(config.memorystore.maxStoreSize);
+    if(config.store.toLowerCase() === "sqlite3")
+        return DataLogStoreFactory.getSQLite3DataLogStore(new sqlite3.Database(config.sqlite3store.dbname));
+    if(config.store.toLocaleLowerCase() === "mariadb")
+        return DataLogStoreFactory.getMariaDBDataLogStore(mariadb.createPool({host: config.mariadbstore.host, user: config.mariadbstore.user, password: config.mariadbstore.password, database: config.mariadbstore.database}), mariadb_batch_buffer_size);
+
+    throw Error("Invalid store type in configuration.");
+}
 
 const run = async () => {
     const config = readAppConfig();
@@ -61,7 +89,8 @@ const run = async () => {
     app.use(express.json());
 
     const controller = new DataLoggerController();
-    controller.register(app);
+    const store = createStore(config);
+    controller.register(app, store);
 
     app.use(express.static('public'));
 

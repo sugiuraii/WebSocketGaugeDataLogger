@@ -27,10 +27,9 @@ import { RunResultModel } from "../Model/RunResultModel";
 import { StateModel } from "../Model/StateModel";
 import { DataLoggerService } from "../Service/DataLoggerService";
 import log4js from "log4js";
-import { DataLogStoreFactory } from "../DataLogStore/DataLogStoreFactory";
 import { convertDataLogStoreToCsv } from "../DataLogStore/DataLogStoreUtils";
-import * as mariadb from "mariadb";
-import {asyncWrap} from "./util/AsyncFunctionWrapper"
+import { asyncWrap } from "./util/AsyncFunctionWrapper"
+import { DataLogStore } from "lib/DataLogger/DataLogStore/DataLogStore";
 
 export class DataLoggerController
 {
@@ -43,14 +42,11 @@ export class DataLoggerController
 
     public get Service() : DataLoggerService { return this.service }
 
-    public register(app : Express) : void
+    public register(app : Express, store: DataLogStore) : void
     {
         const service = this.service;
         const stopPollingInterval = 10;
         
-        const store = DataLogStoreFactory.getMemoryDataLogStore(1000000);
-        //const store = DataLogStoreFactory.getSQLite3DataLogStore(new Database(":memory:"));
-        //const store = DataLogStoreFactory.getMariaDBDataLogStore(mariadb.createPool({host: '0.0.0.0', user: 'test', password: 'test', database: 'test1', connectionLimit: 5}), 20);
         let runningCommand : RunCommandModel = {DataStoreInterval : 100, TableName: "", ParameterCodeList : [], WebsocketMessageInterval : 0}
         
         app.get('/api/store/tablelist', asyncWrap(async (_, res) => res.send(JSON.stringify(await store.getTableList()))));
