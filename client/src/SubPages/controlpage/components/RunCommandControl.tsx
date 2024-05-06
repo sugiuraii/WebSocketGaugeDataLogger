@@ -72,7 +72,7 @@ export const RunCommandControl : FunctionComponent<RunCommandControlProps> = (p)
             <Form>
                 <Form.Group controlId="runSettinng">
                     <Form.Label>Table name to store.</Form.Label>
-                    <Form.Control type="text" onChange={(evt) => setTableName(evt.target.value)} />
+                    <Form.Control type="text" value={tableName} onChange={(evt) => setTableName(evt.target.value)} />
                     <Form.Label>DataStoreSize</Form.Label>
                     <Form.Control type="number" min={0} value={dataStoreSize} onChange={(evt) => setDataStoreSize(Number(evt.target.value))} />
                     <Form.Label>DataStoreInterval(ms)</Form.Label>

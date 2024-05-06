@@ -57,6 +57,10 @@ export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
                     parameterCodeToSelect={p.parameterCodeListToSelect}
                     onSet={ async (p) => 
                     {
+                        if(p.TableName.length === 0) { 
+                            window.alert("Table name is blank.");
+                            return;
+                        }
                         console.log(p);
                         const res :  RunResultModel = (await axiosWrapper.post('/api/run', JSON.stringify(p), {headers: { 'Content-Type': 'application/json'}})).data;
                         console.log(res);
