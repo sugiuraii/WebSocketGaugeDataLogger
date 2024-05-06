@@ -22,13 +22,14 @@
  * THE SOFTWARE.
  */
 
-import { useState, FunctionComponent, useEffect } from "react";
+import { useState, FunctionComponent, useEffect } from "react"
 import * as Echarts from 'echarts'
-import React from "react";
-import { Card, Col, Container, Form, Row, Button } from "react-bootstrap";
-import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
-import { ChartPanel } from "./components/ChartPanel";
+import React from "react"
+import { Card, Col, Container, Form, Row, Button } from "react-bootstrap"
+import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode"
+import { ChartPanel } from "./components/ChartPanel"
 import { CodeSelector } from "./components/CodeSelector"
+import axios from 'axios'
 
 export const ChartPage: FunctionComponent = () => {
     const [selectedTableName, setSelectedTableName] = useState<string>("");
@@ -36,22 +37,22 @@ export const ChartPage: FunctionComponent = () => {
     const [codeToSelect, setCodeToSelect] = useState<WebsocketParameterCode[]>([]);
     const [isTimeAxisElapsed, setTimeAxisElapsed] = useState<boolean>(false);
     const [tableNameList, setTableNameList] = useState<string[]>([]);
-    useEffect(() => {
-        let cleanedUp = false;
-        fetch("/api/store/tablelist").then(res => res.json().then(obj => {
-            if (!cleanedUp)
-                setTableNameList(obj);
-        }));
-        const cleanUp = () => { cleanedUp = true };
-        return cleanUp;
-    }, []);
-
+    
     const tableNameListElem = tableNameList.map(c => <option key={c}>{c}</option>);
     const handleGetParameterList = async () => {
         const params = {tablename: selectedTableName};
         const query = new URLSearchParams(params);
-        const codelist = await fetch("/api/store/getcodelist?" + query).then(res => res.json());
+        const codelist = (await axios.get("/api/store/getcodelist?" + query)).data;
         setCodeToSelect(codelist);
+    }
+
+    const handleRefreshTableList = async () => {
+        const tableList = (await axios.get("/api/store/tablelist")).data;
+        if(!Array.isArray(tableList))
+            throw new TypeError("table list is not array.")
+        setTableNameList(tableList);
+        if(tableList.length > 0)
+            setSelectedTableName(tableList[0]);
     }
 
     const handleAddChart = async (leftAxisCodeList: WebsocketParameterCode[], rightAxisCodeList: WebsocketParameterCode[]) => {
@@ -60,10 +61,8 @@ export const ChartPage: FunctionComponent = () => {
             return;
         }
 
-        const tableListItems = tableNameList.map(c => <option key={c}>{c}</option>);
-
-        const res = await fetch("/api/store");
-        const dataStore: { time: number[], value: { [key: string]: number[] } } = await res.json();
+        const res = await axios.get("/api/store");
+        const dataStore: { time: number[], value: { [key: string]: number[] } } = res.data;
         const startTime = dataStore.time[0];
         const valueTimeStore = new Map(Object.keys(dataStore.value).map(k => [k, dataStore.value[k].map((v, i) => [new Date(dataStore.time[i]).toISOString(), v])]));
         const valueElapsedSecStore = new Map(Object.keys(dataStore.value).map(k => [k, dataStore.value[k].map((v, i) => [(dataStore.time[i] - startTime) / 1000, v])]));
@@ -162,9 +161,8 @@ export const ChartPage: FunctionComponent = () => {
         if(window.confirm("Delete table of '" + tableToDelte + "'?")) {
             const params = {tablename: tableToDelte};
             const query = new URLSearchParams(params);
-            await fetch("/api/store/drop?" + query);
-            const tableNameList = await fetch("/api/store/tablelist").then(res => res.json());
-            setTableNameList(tableNameList);
+            await axios.get("/api/store/drop?" + query);
+            await handleRefreshTableList(); // Auto refresh after deleting table
         }
     }
 
@@ -176,10 +174,14 @@ export const ChartPage: FunctionComponent = () => {
                         <Card>
                             <Card.Header>Table select.</Card.Header>
                             <Card.Body>
-                                <Form.Control as="select" value={selectedTableName} onChange={e => setSelectedTableName(e.target.value)}>
+                                <Form.Control as="select" value={selectedTableName} onChange={e => {
+                                    setSelectedTableName(e.target.value);
+                                    handleGetParameterList();
+                                }
+                                }>
                                     {tableNameListElem}
                                 </Form.Control>
-                                <Button variant="primary" onClick={handleGetParameterList}>Load</Button>
+                                <Button variant="secondary" onClick={handleRefreshTableList}>Refresh List</Button>
                                 <Button variant="danger" onClick={handleDeleteTable}>Delete</Button>
                             </Card.Body>
                         </Card>

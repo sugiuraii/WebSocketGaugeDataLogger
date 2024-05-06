@@ -29,6 +29,7 @@ import React from "react";
 import { useEffect, useState, FunctionComponent } from "react";
 import { RunCommandControl } from "./components/RunCommandControl";
 import { RunStateControl } from "./components/RunStateControl";
+import axios from 'axios';
 
 export type ControlPageProps = 
 {
@@ -39,17 +40,16 @@ export type ControlPageProps =
 export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
     const [appState, setAppState] = useState<StateModel>(p.initialState);
     
-    useEffect( () => {
-        const interval = setInterval(() => {
-            fetch("/api/state").then(res => res.json().then(obj => { 
-                    setAppState(obj);
-                }));
-              }, 200);
-          return () => clearInterval(interval);
-    },[]);
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const res = await axios.get("/api/state");
+            setAppState(res.data);
+        }, 200);
+        return () => clearInterval(interval);
+    }, []);
 
     const pageElem = appState.IsRunning?
-                <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await fetch('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
+                <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await axios.post('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
                 :
                 <RunCommandControl
                     defaultSetting={appState.RunningCommand}
@@ -57,7 +57,7 @@ export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
                     onSet={ async (p) => 
                     {
                         console.log(p);
-                        const res :  RunResultModel = await(await fetch('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p) })).json();
+                        const res :  RunResultModel = (await axios.post('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p)})).data;
                         console.log(res);
                         if(!res.IsSucceed)
                             window.alert("Error : " + res.Error);
