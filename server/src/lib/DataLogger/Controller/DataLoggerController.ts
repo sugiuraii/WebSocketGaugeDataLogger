@@ -48,10 +48,10 @@ export class DataLoggerController
         const service = this.service;
         const stopPollingInterval = 10;
         
-        //const store = DataLogStoreFactory.getMemoryDataLogStore(command.ParameterCodeList, command.DataStoreSize);
+        const store = DataLogStoreFactory.getMemoryDataLogStore(1000000);
         //const store = DataLogStoreFactory.getSQLite3DataLogStore(new Database(":memory:"));
-        const store = DataLogStoreFactory.getMariaDBDataLogStore(mariadb.createPool({host: '0.0.0.0', user: 'test', password: 'test', database: 'test1', connectionLimit: 5}), 20);
-        let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, TableName: "", ParameterCodeList : [], WebsocketMessageInterval : 0}
+        //const store = DataLogStoreFactory.getMariaDBDataLogStore(mariadb.createPool({host: '0.0.0.0', user: 'test', password: 'test', database: 'test1', connectionLimit: 5}), 20);
+        let runningCommand : RunCommandModel = {DataStoreInterval : 100, TableName: "", ParameterCodeList : [], WebsocketMessageInterval : 0}
         
         app.get('/api/store/tablelist', asyncWrap(async (_, res) => res.send(JSON.stringify(await store.getTableList()))));
         app.get('/api/store/get', asyncWrap(async (req, res) => {            
