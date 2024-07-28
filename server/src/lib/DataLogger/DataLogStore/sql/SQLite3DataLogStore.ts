@@ -32,7 +32,8 @@ export class SQLite3DataLogStore implements DataLogStore {
         this.database = database;
     }
     public async getTableList(): Promise<string[]> {
-        const tables = await this.allsqlAsync(this.database, "SHOW TABLES;");
+        const res = await this.allsqlAsync(this.database, "SELECT NAME FROM sqlite_master WHERE type='table';");
+        const tables = res.map(e => String(e.name));
         return tables;
     }
     
