@@ -22,9 +22,29 @@
  * THE SOFTWARE.
  */
 
-export interface DataLogStore
+import { DataLogStore } from "./DataLogStore";
+
+export async function convertDataLogStoreToCsv(store : DataLogStore, tableName : string) : Promise<string>
 {
-    readonly Store : {time: number[], value : {[key : string] : number[]}};
-    pushSample(time : number, value : {[key : string] : number}) : void;
-    close() : void;
+    const samples = await store.getSamples(tableName);
+    const timeArray = samples.time;
+    const valueArray = samples.value;
+
+    let outString  = "";
+    // Create Header
+    outString += "Time,";
+    outString += (Object.keys(samples.value).join() + '\n');
+
+    const datLength = timeArray.length;
+    for(let i = 0; i < datLength; i++)
+    {
+        const singleSampleDat : number[] = []; 
+        singleSampleDat.push(timeArray[i]);
+        for(let key of Object.keys(valueArray))
+            singleSampleDat.push(valueArray[key][i]);
+        outString += (singleSampleDat.map(num => num.toString()).join() + '\n');
+    }
+
+    return outString;
 }
+

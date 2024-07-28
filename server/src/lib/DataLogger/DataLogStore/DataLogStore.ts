@@ -24,7 +24,10 @@
 
 export interface DataLogStore
 {
-    readonly Store : {time: number[], value : {[key : string] : number[]}};
-    pushSample(time : number, value : {[key : string] : number}) : void;
-    close() : void;
+    getTableList():Promise<string[]>;
+    getSamples(tableName: string) : Promise<{time: number[], value : {[key : string] : number[]}}>;
+    createTable(tableName: string, keyNameList: string[]): Promise<void>;
+    pushSample(time : number, value : {[key : string] : number}) : Promise<void>;
+    flushBuffer() : Promise<void>;
+    dropTable(tableName:string): Promise<void>;
 }

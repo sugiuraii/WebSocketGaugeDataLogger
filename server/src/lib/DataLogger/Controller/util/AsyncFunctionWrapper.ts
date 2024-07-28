@@ -21,10 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import { RequestHandler, Request, Response, NextFunction } from 'express'
 
-export interface DataLogStore
-{
-    readonly Store : {time: number[], value : {[key : string] : number[]}};
-    pushSample(time : number, value : {[key : string] : number}) : void;
-    close() : void;
+export function asyncWrap(fn:(req: Request, res: Response, next: NextFunction) => Promise<any>): RequestHandler {
+  return (req, res, next) => fn(req, res, next).catch(next)
 }

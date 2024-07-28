@@ -22,12 +22,14 @@
  * THE SOFTWARE.
  */
 import { Express } from "express";
-import { convertDataLogStoreToCsv, DataLogStoreFactory } from "../Model/DataLogStore";
 import { RunCommandModel } from "../Model/RunCommandModel";
 import { RunResultModel } from "../Model/RunResultModel";
 import { StateModel } from "../Model/StateModel";
 import { DataLoggerService } from "../Service/DataLoggerService";
 import log4js from "log4js";
+import { convertDataLogStoreToCsv } from "../DataLogStore/DataLogStoreUtils";
+import { asyncWrap } from "./util/AsyncFunctionWrapper"
+import { DataLogStore } from "lib/DataLogger/DataLogStore/DataLogStore";
 
 export class DataLoggerController
 {
@@ -40,40 +42,63 @@ export class DataLoggerController
 
     public get Service() : DataLoggerService { return this.service }
 
-    public register(app : Express) : void
+    public register(app : Express, store: DataLogStore) : void
     {
         const service = this.service;
         const stopPollingInterval = 10;
         
-        let store = DataLogStoreFactory.getMemoryDataLogStore(1);
-        let runningCommand : RunCommandModel = {DataStoreInterval : 100, DataStoreSize : 10000, ParameterCodeList : [], WebsocketMessageInterval : 0}
-
-        app.get('/api/store', (req, res) => 
-        {
-            res.send(JSON.stringify(store.Store));
+        let runningCommand : RunCommandModel = {DataStoreInterval : 100, TableName: "", ParameterCodeList : [], WebsocketMessageInterval : 0}
+        
+        app.get('/api/store/tablelist', asyncWrap(async (_, res) => res.send(JSON.stringify(await store.getTableList()))));
+        app.get('/api/store/get', asyncWrap(async (req, res) => {            
+            const tablename = req.query.tablename as string | undefined;
+            if(tablename === undefined) throw Error("Query of table name is not defined.");
+            const samples = await store.getSamples(tablename);
+            res.send(JSON.stringify(samples));
             this.logger.info("Data store is requested from " + req.headers.host);
-        });
-
-        app.get('/api/store/getAsCSV',  (req, res) => 
-        {
-            res.send(convertDataLogStoreToCsv(store))
+        }));
+        app.get('/api/store/getAsCSV', asyncWrap(async (req, res) => {
+            const tablename = req.query.tablename as string | undefined;
+            if(tablename === undefined) throw Error("Query of table name is not defined.");
+            await res.send(convertDataLogStoreToCsv(store, tablename));
             this.logger.info("Data store is requested by csv format, from " + req.headers.host);
-        });
-        app.get('/api/store/codelist', (_, res) => res.send(JSON.stringify(Object.keys(store.Store.value))));
+        }));
+        app.get('/api/store/drop', asyncWrap(async (req, res) => {
+            const tablename = req.query.tablename as string | undefined;
+            if (tablename === undefined) throw Error("Query of table name is not defined.");
+            try {
+                await store.dropTable(tablename);
+                const result: RunResultModel = { IsSucceed: true, Error: "" };
+                await res.send(result);
+                this.logger.info("Data table : " + tablename + " is dropped, by the request from " + req.headers.host);
+            } catch (e) {
+                if (e instanceof Error) {
+                    this.logger.error(e);
+                    const result: RunResultModel = { IsSucceed: false, Error: e.message };
+                    res.send(result);
+                }
+                else
+                    throw e;
+            }
+        }));
+        app.get('/api/store/getcodelist', asyncWrap(async (req, res) => {
+            const tablename = req.query.tablename as string | undefined;
+            if(tablename === undefined) throw Error("Query of table name is not defined.");
+            res.send(JSON.stringify(Object.keys((await store.getSamples(tablename)).value)))
+        }));
+        
         app.get('/api/setting/available_code_list', (_, res) => res.send(service.getAvailableParameterCodeList()));
-        app.get('/api/state', (_, res) => 
-        {
+        app.get('/api/state', (_, res) => {
             const runState : StateModel = {IsRunning : service.IsRunning, RunningCommand : runningCommand};
             res.send(JSON.stringify(runState));
         })
 
-        app.post('/api/run', async (req, res) => 
-        {
+        app.post('/api/run', asyncWrap(async (req, res) => {
             const command : RunCommandModel = req.body;
             runningCommand = command;
             this.logger.info("Logger service is stated. Running command is ...");
             this.logger.info(JSON.stringify(command));
-            store = DataLogStoreFactory.getMemoryDataLogStore(command.DataStoreSize);
+            await store.createTable(runningCommand.TableName, command.ParameterCodeList);
             try
             {
                 await service.run(store, command.ParameterCodeList, command.DataStoreInterval, command.WebsocketMessageInterval);
@@ -91,9 +116,9 @@ export class DataLoggerController
                 else
                     throw e;
             }
-        });
+        }));
 
-        app.post('/api/stop', async(_, res) => 
+        app.post('/api/stop', asyncWrap(async(_, res) => 
         {
             service.stop();
             while(!service.IsRunning) {
@@ -103,6 +128,6 @@ export class DataLoggerController
             const runState : StateModel = {IsRunning : service.IsRunning, RunningCommand : runningCommand};
             res.send(JSON.stringify(runState));
             this.logger.info("Logger service is stopped.");
-        });
+        }));
     }
 }

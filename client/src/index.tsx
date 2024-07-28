@@ -1,22 +1,21 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import * as Echarts from 'echarts'
-import ReactEcharts from 'echarts-for-react'
+import { createRoot } from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Container, Nav, Navbar } from 'react-bootstrap';
-import { ControlPage } from 'SubPages/ControlPage';
-import { ChartPage } from 'SubPages/ChartPage';
+import { ControlPage } from 'SubPages/controlpage/ControlPage';
+import { ChartPage } from 'SubPages/chartpage/ChartPage';
+import axios from 'axios';
 
 const run = async () => {
     const container = document.getElementById('contents');
     
-    const parameterCodeListToSelect = await(await fetch('/api/setting/available_code_list')).json();
-    const appState = await(await fetch("/api/state")).json();
+    const parameterCodeListToSelect = (await axios.get('/api/setting/available_code_list')).data;
+    const appState = (await axios.get("/api/state")).data;
     const chartElem = <ChartPage />; 
     const controlElem = <ControlPage initialState={appState} parameterCodeListToSelect={parameterCodeListToSelect}/>;
-
-    ReactDOM.render
+    const root = createRoot(container!); 
+    root.render
         (
             <>
             <HashRouter>
@@ -39,7 +38,7 @@ const run = async () => {
                 </Routes>
             </HashRouter>                
             </>
-            , container);
+        );
 };
 
 (async function main() {

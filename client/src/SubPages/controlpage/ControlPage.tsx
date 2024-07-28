@@ -27,8 +27,10 @@ import { StateModel } from "lib/DataLogger/Model/StateModel";
 import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/WebsocketParameterCode";
 import React from "react";
 import { useEffect, useState, FunctionComponent } from "react";
-import { RunCommandControl } from "../Components/RunCommandControl";
-import { RunStateControl } from "../Components/RunStateControl";
+import { RunCommandControl } from "./components/RunCommandControl";
+import { RunStateControl } from "./components/RunStateControl";
+import axios from 'axios';
+import { axiosWrapper } from "lib/axios-utils/AxiosErrorHandlerWrapper"
 
 export type ControlPageProps = 
 {
@@ -39,25 +41,28 @@ export type ControlPageProps =
 export const ControlPage : FunctionComponent<ControlPageProps> = (p) => {
     const [appState, setAppState] = useState<StateModel>(p.initialState);
     
-    useEffect( () => {
-        const interval = setInterval(() => {
-            fetch("/api/state").then(res => res.json().then(obj => { 
-                    setAppState(obj);
-                }));
-              }, 200);
-          return () => clearInterval(interval);
-    },[]);
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const res = await axios.get("/api/state");
+            setAppState(res.data);
+        }, 200);
+        return () => clearInterval(interval);
+    }, []);
 
     const pageElem = appState.IsRunning?
-                <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await fetch('/api/stop', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: "" })}/>
+                <RunStateControl RunningState={appState.RunningCommand} onStop={ async () => await axiosWrapper.post('/api/stop')}/>
                 :
                 <RunCommandControl
                     defaultSetting={appState.RunningCommand}
                     parameterCodeToSelect={p.parameterCodeListToSelect}
                     onSet={ async (p) => 
                     {
+                        if(p.TableName.length === 0) { 
+                            window.alert("Table name is blank.");
+                            return;
+                        }
                         console.log(p);
-                        const res :  RunResultModel = await(await fetch('/api/run', {method: 'post', headers: { 'Content-Type': 'application/json' },  body: JSON.stringify(p) })).json();
+                        const res :  RunResultModel = (await axiosWrapper.post('/api/run', JSON.stringify(p), {headers: { 'Content-Type': 'application/json'}})).data;
                         console.log(res);
                         if(!res.IsSucceed)
                             window.alert("Error : " + res.Error);

@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import { Request, Response, NextFunction } from "express"
+import log4js from "log4js";
 
-export interface DataLogStore
-{
-    readonly Store : {time: number[], value : {[key : string] : number[]}};
-    pushSample(time : number, value : {[key : string] : number}) : void;
-    close() : void;
+export const DefaultErrorHandler = (err: Error, req: Request, res: Response, next:NextFunction) => {
+    const logger = log4js.getLogger();
+    logger.error(err);
+    res.status(500).send(err);
 }

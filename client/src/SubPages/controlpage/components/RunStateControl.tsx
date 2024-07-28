@@ -40,8 +40,8 @@ export const RunStateControl : FunctionComponent<RunStateControlProps> = (p) =>
         <Card>
             <Form>
                 <Form.Group controlId="runSettinng">
-                    <Form.Label>DataStoreSize</Form.Label>
-                    <Form.Control readOnly type="number" value={p.RunningState.DataStoreSize} />
+                    <Form.Label>Table name to store.</Form.Label>
+                    <Form.Control readOnly type="text" value={p.RunningState.TableName} />
                     <Form.Label>DataStoreInterval(ms)</Form.Label>
                     <Form.Control readOnly type="number" value={p.RunningState.DataStoreInterval} />
                     <Form.Label>WebSocketMessageInterval</Form.Label>

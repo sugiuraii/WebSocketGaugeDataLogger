@@ -22,9 +22,22 @@
  * THE SOFTWARE.
  */
 
-export interface DataLogStore
+import { DataLogStore } from "./DataLogStore";
+import { MemoryDataLogStore } from "./memory/MemoryDataLogStore";
+import { Database } from 'sqlite3';
+import { Pool } from 'mariadb';
+import { SQLite3DataLogStore } from "./sql/SQLite3DataLogStore";
+import { MariaDBDataLogStore } from "./sql/MariaDBDataLogStore";
+
+export class DataLogStoreFactory
 {
-    readonly Store : {time: number[], value : {[key : string] : number[]}};
-    pushSample(time : number, value : {[key : string] : number}) : void;
-    close() : void;
+    public static getMemoryDataLogStore(maxStoreSize : number) : DataLogStore {
+        return new MemoryDataLogStore(maxStoreSize)
+    };
+    public static getSQLite3DataLogStore(database: Database) {
+        return new SQLite3DataLogStore(database);
+    }
+    public static getMariaDBDataLogStore(connectionPool: Pool, batchBufferSize: number) {
+        return new MariaDBDataLogStore(connectionPool, batchBufferSize);
+    }
 }

@@ -22,9 +22,29 @@
  * THE SOFTWARE.
  */
 
-export interface DataLogStore
-{
-    readonly Store : {time: number[], value : {[key : string] : number[]}};
-    pushSample(time : number, value : {[key : string] : number}) : void;
-    close() : void;
+export class DataLogStoreWriteCache {
+    private Data : any[][];
+    private DataCountToBatchWrite: number;
+    private BatchWriteFunction: (vals: any[][]) => Promise<void>;
+    constructor(batchWriteFunction: (vals: any[]) => Promise<void>, dataCountToBatchWrite: number) {
+        this.BatchWriteFunction = batchWriteFunction;
+        this.DataCountToBatchWrite = dataCountToBatchWrite;
+        this.Data = [];
+    }
+    
+    public async write(val : any[]) : Promise<void> {
+        this.Data.push(val);
+        if(this.Data.length >= this.DataCountToBatchWrite)
+            await this.flush();
+    }
+
+    public async flush() : Promise<void> {
+        if(this.Data.length > 0)
+            await this.BatchWriteFunction(this.Data);
+        this.clear();
+    }
+
+    public clear(): void {
+        this.Data = [];
+    }
 }

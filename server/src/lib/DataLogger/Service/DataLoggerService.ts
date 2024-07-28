@@ -29,8 +29,8 @@ import { ReadModeCode } from "lib/WebSocket/WebSocketCommunication";
 import { performance } from 'perf_hooks';
 import { ILogger } from "lib/MeterAppBase/utils/ILogger";
 import { CancellationToken, CancellationTokenFactory } from "lib/utils/CancellationToken";
-import { DataLogStore } from "../Model/DataLogStore";
 import { Log4jsLogger } from "lib/MeterAppBase/utils/Log4jsLogger";
+import { DataLogStore } from "../DataLogStore/DataLogStore";
 
 export class DataLoggerService
 {
@@ -63,16 +63,15 @@ export class DataLoggerService
         parameterCodeList.forEach(code => wsc.WSMapper.registerParameterCode(code as WebsocketParameterCode, ReadModeCode.SLOWandFAST));
         this.cancellationToken = CancellationTokenFactory.get();
         wsc.Run();
-        const startTime = performance.now();
         while(!this.cancellationToken.IsCancellationRequested)
         {
-            const time = performance.now() - startTime;
+            const time = performance.now() + performance.timeOrigin;
             const value : {[key : string] : number}  =  {};
             parameterCodeList.forEach(code => value[code] = wsc.WSMapper.getValue(code as WebsocketParameterCode));
-            store.pushSample(time, value);
+            await store.pushSample(time, value);
             await new Promise(resolve => setTimeout(resolve, dataStoreInterval));
         }
-        store.close();
+        store.flushBuffer();
         wsc.Stop();
         this.cancellationToken = undefined;
     }   
