@@ -10,8 +10,10 @@
     },
     "sqlite3store": {
         // Database file to store data
-        // Set ":memory:" to in-memory db.
+        // Set ":memory:" to volatile in-memory db.
         "dbname": ":memory:"
+        // Set filepath to file based data store for persistance store.
+        // "dbname": "./test1.db"
     },
     "mariadbstore": {
         // MySQL or MariaDB server hostname, user, password, database name. (Create database by yourself)
