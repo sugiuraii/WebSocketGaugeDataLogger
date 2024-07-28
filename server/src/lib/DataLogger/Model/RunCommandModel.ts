@@ -26,7 +26,6 @@ import { WebsocketParameterCode } from "lib/MeterAppBase/WebsocketObjCollection/
 
 export type RunCommandModel = {
     TableName: string,
-    DataStoreSize : number,
     ParameterCodeList : WebsocketParameterCode[],
     DataStoreInterval : number,
     WebsocketMessageInterval : number;

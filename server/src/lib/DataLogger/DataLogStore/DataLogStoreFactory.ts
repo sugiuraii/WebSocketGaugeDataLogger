@@ -31,7 +31,7 @@ import { MariaDBDataLogStore } from "./sql/MariaDBDataLogStore";
 
 export class DataLogStoreFactory
 {
-    public static getMemoryDataLogStore(keylist: string[], maxStoreSize : number) : DataLogStore {
+    public static getMemoryDataLogStore(maxStoreSize : number) : DataLogStore {
         return new MemoryDataLogStore(maxStoreSize)
     };
     public static getSQLite3DataLogStore(database: Database) {
